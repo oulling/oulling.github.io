@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Project 0 - CS180 Portfolio</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .back-link {
+            margin-bottom: 25px;
+        }
+
+        .back-link a {
+            display: inline-flex;
+            align-items: center;
+            padding: 10px 20px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .back-link a:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+            background: linear-gradient(45deg, #764ba2, #667eea);
+        }
+
+        .project-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+            animation: slideInDown 0.8s ease-out 0.2s both;
+        }
+
+        @keyframes slideInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .project-header h1 {
+            margin: 0 0 10px 0;
+            font-size: 2.5em;
+            font-weight: 300;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .project-header p {
+            margin: 0;
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .content {
+            animation: slideInUp 0.8s ease-out 0.4s both;
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h2 {
+            color: #333;
+            border-left: 4px solid #667eea;
+            padding-left: 15px;
+            margin-top: 30px;
+            font-weight: 600;
+        }
+
+        p {
+            margin-bottom: 20px;
+            text-align: justify;
+            color: #555;
+        }
+
+        .image-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin: 30px 0;
+        }
+
+        .image-item {
+            text-align: center;
+            background: white;
+            padding: 15px;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            animation: zoomIn 0.6s ease-out both;
+        }
+
+        .image-item:nth-child(even) {
+            animation-delay: 0.2s;
+        }
+
+        @keyframes zoomIn {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .image-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .image-item img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            transition: transform 0.3s ease;
+        }
+
+        .image-item:hover img {
+            transform: scale(1.05);
+        }
+
+        .image-caption {
+            margin-top: 15px;
+            font-style: italic;
+            color: #666;
+            font-weight: 500;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        b {
+            color: #333;
+            font-weight: 600;
+        }
+
+        i {
+            color: #555;
+        }
+
+        /* 添加一些装饰性元素 */
+        .content::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #667eea, #764ba2, #667eea);
+            border-radius: 2px;
+        }
+
+        .content {
+            position: relative;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                padding: 20px;
+            }
+
+            .project-header h1 {
+                font-size: 2em;
+            }
+
+            .image-gallery {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="back-link">
+            <a href="../index.html">← returning to home page</a>
+        </div>
+
+        <div class="project-header">
+            <h1>Project 0</h1>
+            <p>PRESENTING THE WORK I HAVE DONE</p>
+        </div>
+
+        <div class="content">
+            <h2>Description</h2>
+            <p><b>Part 1: Selfie: The Wrong Way vs. The Right Way </b><br>
+                Take a picture of your friend (or yourself) from close up. You get a typical distorted selfie image.
+                Now
+                step back several feet from your subject, zoom in, and take a second picture. Try to get the face in
+                the
+                second photo to be the same size as in the first photo. If you've done things right, the second
+                portrait
+                should look much better than the first one. Think about why this is.</p>
+
+            <div class="image-gallery">
+                <div class="image-item">
+                    <img src="media\53b7d4fdcaada92dd747f4af914ad844.jpg" alt="1-1" onerror="this.style.display='none'">
+                    <div class="image-caption">close up</div>
+                </div>
+                <div class="image-item">
+                    <img src="media\1091be21721324aae9d663dcc6e144bc.jpg" alt="1-2" onerror="this.style.display='none'">
+                    <div class="image-caption">step back and zoom in</div>
+                </div>
+            </div>
+
+            <p> <b>The probable reason:</b> <i>When taking close-up portraits with a wide-angle lens, the relative
+                    distance
+                    between
+                    the camera, nose, and ears differs significantly. This perspective distortion makes the nose appear
+                    exaggeratedly large
+                    and the ears appear smaller, leading to unnatural facial proportions. In contrast, when the
+                    photographer
+                    steps back and uses a longer focal length to zoom in, the relative distance difference between the
+                    nose
+                    and ears is reduced, minimizing perspective distortion and producing more natural facial
+                    proportions.</i>
+
+            <p><b>Part 2: Architectural Perspective Compression </b> <br>
+                Let's repeat the same procedure in reverse, for an urban scene. Pick a nice view down a long street (or
+                a walking path on campus), zoom in, and take a photo. Now, walk down the street in the direction of your
+                first shot, and take a second photo without zoom, such that the scene in the two photos appears
+                approximately the same size. The first picture should look flattened, or compressed, compared to the
+                second. Again, think about why.
+
+            <div class="image-gallery">
+                <div class="image-item">
+                    <img src="media\805e1d95c85e5f993192ab6253a8f2e5.jpg" alt="2-1" onerror="this.style.display='none'">
+                    <div class="image-caption">zoom in</div>
+                </div>
+                <div class="image-item">
+                    <img src="media\128273d9a2cf1f241acfbf4c742b9744.jpg" alt="2-2" onerror="this.style.display='none'">
+                    <div class="image-caption">with zoom</div>
+                </div>
+            </div>
+
+            <p> <b>The probable reason:</b> <i>When photographing an urban street scene from far away with a telephoto
+                    lens, perspective is compressed: the relative distance between near and far objects is reduced, so
+                    buildings and street elements appear closer together, giving the scene a flattened look. In
+                    contrast,
+                    when moving closer and using a wide-angle lens, perspective is exaggerated: nearby objects appear
+                    much
+                    larger compared to distant ones, making the street look deeper and more stretched.</i>
+
+
+            <p><b>Part 3: The Dolly Zoom </b><br>
+                In this part, we will be duplicating a classic film effect called the dolly zoom. It is a camera
+                movement also known as the "Vertigo shot", after a famous scene in Hitchcock's Vertigo. Here are some
+                examples of this effect in cinema: <br>
+
+                The idea is to simultaneously move the camera back while also zooming in. First, come up with a good
+                setting for the shot (e.g., a scene with stuffed animals is one popular choice). Now take a few (4-8 or
+                even more!) still photos while you move the camera back and zoom in, keeping the resulting image roughly
+                the same size. Combine your stills into an animated GIF file—you have a dolly zoom!
+
+            <div class="image-gallery">
+                <div class="image-item">
+                    <img src="media\imageonline-co-gifimage (1).gif" alt="2-1" onerror="this.style.display='none'">
+                    <div class="image-caption">The Dolly Zoom</div>
+                </div>
+            </div>
+
+        </div>
+        <div class="back-link">
+            <a href="../index.html">← returning to home page</a>
+        </div>
+    </div>
+</body>
+
+</html>
