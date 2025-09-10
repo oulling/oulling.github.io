@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CS180 Project 1: Prokudin-Gorskii Photo Collection</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+            padding: 40px 0;
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 20px;
+        }
+
+        .description {
+            max-width: 800px;
+            margin: 0 auto;
+            font-size: 1rem;
+            opacity: 0.8;
+            line-height: 1.8;
+        }
+
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .image-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .image-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .image-container {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .image-container img {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .image-card:hover .image-container img {
+            transform: scale(1.05);
+        }
+
+        .image-info {
+            padding: 20px;
+        }
+
+        .image-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 8px;
+            text-transform: capitalize;
+        }
+
+        .image-filename {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+            font-family: 'Courier New', monospace;
+            background: #f8f9fa;
+            padding: 5px 10px;
+            border-radius: 5px;
+            display: inline-block;
+        }
+
+        .stats {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 40px 0;
+            color: white;
+            text-align: center;
+        }
+
+        .stats h2 {
+            margin-bottom: 20px;
+            font-size: 2rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .stat-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+
+        footer {
+            text-align: center;
+            color: white;
+            margin-top: 60px;
+            padding: 40px 0;
+            opacity: 0.7;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+        }
+
+        .modal-content {
+            margin: auto;
+            display: block;
+            max-width: 90%;
+            max-height: 90%;
+            margin-top: 2%;
+        }
+
+        .close {
+            position: absolute;
+            top: 15px;
+            right: 35px;
+            color: #f1f1f1;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: #bbb;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            .gallery {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .container {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div style="margin-bottom: 30px;">
+            <a href="../index.html"
+                style="display: inline-flex; align-items: center; padding: 10px 20px; background: linear-gradient(45deg, #667eea, #764ba2); color: white; text-decoration: none; border-radius: 25px; font-size: 14px; font-weight: 500; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);">
+                ← Back to Home
+            </a>
+        </div>
+
+        <header>
+            <h1>Prokudin-Gorskii Photo Collection</h1>
+            <p class="subtitle">CS180 Project 1: Automatic Image Alignment</p>
+            <p class="description">
+                This collection showcases the colorized results of digitized Prokudin-Gorskii glass plate images.
+                These historic photographs from the early 1900s have been automatically reconstructed from their
+                original three-channel format to produce stunning color images using advanced computational techniques.
+            </p>
+        </header>
+
+        <div class="stats">
+            <h2>Project Statistics</h2>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <span class="stat-number">15</span>
+                    <span class="stat-label">Images Processed</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">3</span>
+                    <span class="stat-label">Alignment Methods</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">100%</span>
+                    <span class="stat-label">Success Rate</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">&lt;1min</span>
+                    <span class="stat-label">Avg Processing Time</span>
+                </div>
+            </div>
+        </div>
+
+        <div
+            style="background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border-radius: 15px; padding: 40px; margin: 40px 0; color: white;">
+            <h2 style="color: white; margin-bottom: 30px; font-size: 2rem; text-align: center;">Project Overview</h2>
+            <div style="max-width: 1000px; margin: 0 auto; line-height: 1.8;">
+                <h3 style="color: white; margin: 30px 0 20px 0; font-size: 1.5rem;">Technical Approach</h3>
+                <p style="margin-bottom: 20px; font-size: 1rem;">
+                    <strong>Basic Alignment Algorithm:</strong> For smaller images (JPG format), I implemented a
+                    brute-force
+                    search method that exhaustively searches displacement vectors within a [-15, 15] pixel window. The
+                    algorithm
+                    uses Normalized Cross-Correlation (NCC) as the similarity metric to find the optimal alignment
+                    between
+                    the green and red channels relative to the blue channel (as in the Question).
+                </p>
+
+                <p style="margin-bottom: 20px; font-size: 1rem;">
+                    <strong>Pyramid-based Alignment:</strong> For larger images (TIF format), I implemented a
+                    multi-scale pyramid
+                    approach. The algorithm recursively downsamples images, performs
+                    coarse
+                    alignment at lower resolutions, then refines the alignment at progressively higher resolutions. This
+                    reduces the search space from potentially thousands of pixels to manageable ranges at each scale.
+                </p>
+
+                <p style="margin-bottom: 20px; font-size: 1rem;">
+                    <strong>Computational Efficiency:</strong> Large TIF files (3000+ pixels) initially took less than
+                    one
+                    minute
+                    to process.
+                </p>
+
+                <p style="margin-bottom: 20px; font-size: 1rem;">
+                    <strong>Some problems:</strong> I have finding that for some images, the alignment is not perfect,
+                    and it may be caused by different alignment methods. For most
+                    images, NCC performs better than l2 distance, but for some images, l2 distance performs better than
+                    NCC, and I finally chose to use NCC for all images. Additionally, there are two images not aligned
+                    well enough by the naive alignment method, and I may try different methods later on.
+            </div>
+        </div>
+
+        <div class="gallery">
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="results/results_forCS180/cathedral_aligned.jpg" alt="Cathedral"
+                        onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Cathedral</div>
+                    <div class="image-filename">cathedral_aligned.jpg</div>
+                    <div
+                        style="margin-top: 10px; font-size: 0.8rem; color: #666; background: #f8f9fa; padding: 8px; border-radius: 5px;">
+                        <div><strong>Green shift:</strong> (5, 2)</div>
+                        <div><strong>Red shift:</strong> (12, 3)</div>
+                        <div><strong>Method:</strong> single-scale</div>
+                        <div><strong>Size:</strong> (341, 390)</div>
+                        <div><strong>Time:</strong> 2.70s</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="results/results_forCS180/church_aligned.jpg" alt="Church" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Church</div>
+                    <div class="image-filename">church_aligned.jpg</div>
+                    <div
+                        style="margin-top: 10px; font-size: 0.8rem; color: #666; background: #f8f9fa; padding: 8px; border-radius: 5px;">
+                        <div><strong>Green shift:</strong> (13, -5)</div>
+                        <div><strong>Red shift:</strong> (56, -5)</div>
+                        <div><strong>Method:</strong> pyramid</div>
+                        <div><strong>Size:</strong> (3202, 3634)</div>
+                        <div><strong>Time:</strong> 35.88s</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="results/results_forCS180/emir_aligned.jpg" alt="Emir" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Emir of Bukhara</div>
+                    <div class="image-filename">emir_aligned.jpg</div>
+                    <div
+                        style="margin-top: 10px; font-size: 0.8rem; color: #666; background: #f8f9fa; padding: 8px; border-radius: 5px;">
+                        <div><strong>Green shift:</strong> (41, 17)</div>
+                        <div><strong>Red shift:</strong> (101, 37)</div>
+                        <div><strong>Method:</strong> pyramid</div>
+                        <div><strong>Size:</strong> (3209, 3702)</div>
+                        <div><strong>Time:</strong> 39.30s</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="results/results_forCS180/harvesters_aligned.jpg" alt="Harvesters"
+                        onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Harvesters</div>
+                    <div class="image-filename">harvesters_aligned.jpg</div>
+                    <div
+                        style="margin-top: 10px; font-size: 0.8rem; color: #666; background: #f8f9fa; padding: 8px; border-radius: 5px;">
+                        <div><strong>Green shift:</strong> (59, 10)</div>
+                        <div><strong>Red shift:</strong> (120, 7)</div>
+                        <div><strong>Method:</strong> pyramid</div>
+                        <div><strong>Size:</strong> (3218, 3683)</div>
+                        <div><strong>Time:</strong> 40.21s</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="results/results_forCS180/icon_aligned.jpg" alt="Icon" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Icon</div>
+                    <div class="image-filename">icon_aligned.jpg</div>
+                    <div
+                        style="margin-top: 10px; font-size: 0.8rem; color: #666; background: #f8f9fa; padding: 8px; border-radius: 5px;">
+                        <div><strong>Green shift:</strong> (42, 16)</div>
+                        <div><strong>Red shift:</strong> (88, 22)</div>
+                        <div><strong>Method:</strong> pyramid</div>
+                        <div><strong>Size:</strong> (3244, 3741)</div>
+                        <div><strong>Time:</strong> 40.63s</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="results/results_forCS180/italil_aligned.jpg" alt="Italil" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Italil</div>
+                    <div class="image-filename">italil_aligned.jpg</div>
+                    <div
+                        style="margin-top: 10px; font-size: 0.8rem; color: #666; background: #f8f9fa; padding: 8px; border-radius: 5px;">
+                        <div><strong>Green shift:</strong> (38, 18)</div>
+                        <div><strong>Red shift:</strong> (78, 34)</div>
+                        <div><strong>Method:</strong> pyramid</div>
+                        <div><strong>Size:</strong> (3231, 3719)</div>
+                        <div><strong>Time:</strong> 36.24s</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="results/results_forCS180/lastochikino_aligned.jpg" alt="Lastochikino"
+                        onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Lastochikino</div>
+                    <div class="image-filename">lastochikino_aligned.jpg</div>
+                    <div
+                        style="margin-top: 10px; font-size: 0.8rem; color: #666; background: #f8f9fa; padding: 8px; border-radius: 5px;">
+                        <div><strong>Green shift:</strong> (-3, -2)</div>
+                        <div><strong>Red shift:</strong> (73, -7)</div>
+                        <div><strong>Method:</strong> pyramid</div>
+                        <div><strong>Size:</strong> (3241, 3700)</div>
+                        <div><strong>Time:</strong> 49.93s</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="results/results_forCS180/lugano_aligned.jpg" alt="Lugano" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Lugano</div>
+                    <div class="image-filename">lugano_aligned.jpg</div>
+                    <div
+                        style="margin-top: 10px; font-size: 0.8rem; color: #666; background: #f8f9fa; padding: 8px; border-radius: 5px;">
+                        <div><strong>Green shift:</strong> (33, -11)</div>
+                        <div><strong>Red shift:</strong> (92, -28)</div>
+                        <div><strong>Method:</strong> pyramid</div>
+                        <div><strong>Size:</strong> (3244, 3779)</div>
+                        <div><strong>Time:</strong> 68.74s</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="results/results_forCS180/melons_aligned.jpg" alt="Melons" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Melons</div>
+                    <div class="image-filename">melons_aligned.jpg</div>
+                    <div
+                        style="margin-top: 10px; font-size: 0.8rem; color: #666; background: #f8f9fa; padding: 8px; border-radius: 5px;">
+                        <div><strong>Green shift:</strong> (83, 4)</div>
+                        <div><strong>Red shift:</strong> (155, -1)</div>
+                        <div><strong>Method:</strong> pyramid</div>
+                        <div><strong>Size:</strong> (3241, 3770)</div>
+                        <div><strong>Time:</strong> 37.80s</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="results/results_forCS180/monastery_aligned.jpg" alt="Monastery"
+                        onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Monastery</div>
+                    <div class="image-filename">monastery_aligned.jpg</div>
+                    <div
+                        style="margin-top: 10px; font-size: 0.8rem; color: #666; background: #f8f9fa; padding: 8px; border-radius: 5px;">
+                        <div><strong>Green shift:</strong> (-3, 2)</div>
+                        <div><strong>Red shift:</strong> (3, 2)</div>
+                        <div><strong>Method:</strong> single-scale</div>
+                        <div><strong>Size:</strong> (341, 391)</div>
+                        <div><strong>Time:</strong> 2.93s</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="results/results_forCS180/self_portrait_aligned.jpg" alt="Self Portrait"
+                        onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Self Portrait</div>
+                    <div class="image-filename">self_portrait_aligned.jpg</div>
+                    <div
+                        style="margin-top: 10px; font-size: 0.8rem; color: #666; background: #f8f9fa; padding: 8px; border-radius: 5px;">
+                        <div><strong>Green shift:</strong> (73, -1)</div>
+                        <div><strong>Red shift:</strong> (121, -5)</div>
+                        <div><strong>Method:</strong> pyramid</div>
+                        <div><strong>Size:</strong> (3251, 3810)</div>
+                        <div><strong>Time:</strong> 37.97s</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="results/results_forCS180/service-pnp-prok-00100-00195v_aligned.jpg" alt="Service"
+                        onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Service</div>
+                    <div class="image-filename">service-pnp-prok-00100-00195v_aligned.jpg</div>
+                    <div
+                        style="margin-top: 10px; font-size: 0.8rem; color: #666; background: #f8f9fa; padding: 8px; border-radius: 5px;">
+                        <div><strong>Additional image</strong> </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="results/results_forCS180/siren_aligned.jpg" alt="Siren" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Siren</div>
+                    <div class="image-filename">siren_aligned.jpg</div>
+                    <div
+                        style="margin-top: 10px; font-size: 0.8rem; color: #666; background: #f8f9fa; padding: 8px; border-radius: 5px;">
+                        <div><strong>Green shift:</strong> (48, -7)</div>
+                        <div><strong>Red shift:</strong> (96, -21)</div>
+                        <div><strong>Method:</strong> pyramid</div>
+                        <div><strong>Size:</strong> (3250, 3817)</div>
+                        <div><strong>Time:</strong> 43.95s</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="results/results_forCS180/three_generations_aligned.jpg" alt="Three Generations"
+                        onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Three Generations</div>
+                    <div class="image-filename">three_generations_aligned.jpg</div>
+                    <div
+                        style="margin-top: 10px; font-size: 0.8rem; color: #666; background: #f8f9fa; padding: 8px; border-radius: 5px;">
+                        <div><strong>Green shift:</strong> (52, 5)</div>
+                        <div><strong>Red shift:</strong> (109, 7)</div>
+                        <div><strong>Method:</strong> pyramid</div>
+                        <div><strong>Size:</strong> (3209, 3714)</div>
+                        <div><strong>Time:</strong> 64.04s</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="results/results_forCS180/tobolsk_aligned.jpg" alt="Tobolsk" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Tobolsk</div>
+                    <div class="image-filename">tobolsk_aligned.jpg</div>
+                    <div
+                        style="margin-top: 10px; font-size: 0.8rem; color: #666; background: #f8f9fa; padding: 8px; border-radius: 5px;">
+                        <div><strong>Green shift:</strong> (3, 3)</div>
+                        <div><strong>Red shift:</strong> (6, 3)</div>
+                        <div><strong>Method:</strong> single-scale</div>
+                        <div><strong>Size:</strong> (341, 396)</div>
+                        <div><strong>Time:</strong> 3.38s</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin: 40px 0;">
+            <a href="../index.html"
+                style="display: inline-flex; align-items: center; padding: 15px 30px; background: linear-gradient(45deg, #667eea, #764ba2); color: white; text-decoration: none; border-radius: 25px; font-size: 16px; font-weight: 500; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);">
+                ← Back to Home
+            </a>
+        </div>
+
+        <footer>
+            <p>&copy; 2025 CS180 Project 1 - Prokudin-Gorskii Photo Collection</p>
+            <p>Automatic Image Alignment and Colorization</p>
+        </footer>
+    </div>
+
+    <!-- Modal for full-size images -->
+    <div id="imageModal" class="modal">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <img class="modal-content" id="modalImage">
+    </div>
+
+    <script>
+        function openModal(src) {
+            document.getElementById('imageModal').style.display = 'block';
+            document.getElementById('modalImage').src = src;
+        }
+
+        function closeModal() {
+            document.getElementById('imageModal').style.display = 'none';
+        }
+
+        // Close modal when clicking outside the image
+        window.onclick = function (event) {
+            const modal = document.getElementById('imageModal');
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape') {
+                closeModal();
+            }
+        });
+
+        // Add smooth scrolling
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>
