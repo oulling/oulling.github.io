@@ -208,6 +208,9 @@
         }
     </style>
 </head>
+
+
+
 <body>
     <div class="container">
         <div style="margin-bottom: 30px;">
@@ -262,16 +265,53 @@
                     uses Normalized Cross-Correlation (NCC) as the similarity metric to find the optimal alignment
                     between
                     the green and red channels relative to the blue channel (as in the Question).
+
+                    My single-scale alignment approach forms the foundation of the entire colorization system,
+                    implementing
+                    NCC algorithm that I chose over the simpler L2 distance metric. The
+                    implementation begins by standardizing both input images through a normalization process that
+                    subtracts
+                    the mean intensity and divides by the standard deviation, effectively transforming each image to
+                    have
+                    zero mean and unit variance. This critical preprocessing step ensures that the alignment is based on
+                    structural similarity patterns rather than absolute pixel values, which is essential for handling
+                    the
+                    inherent brightness differences between the Blue, Green, and Red channels in Prokudin-Gorskii
+                    images.
                 </p>
 
                 <p style="margin-bottom: 20px; font-size: 1rem;">
-                    <strong>Pyramid-based Alignment:</strong> For larger images (TIF format), I implemented a
-                    multi-scale pyramid
-                    approach. The algorithm recursively downsamples images, performs
-                    coarse
-                    alignment at lower resolutions, then refines the alignment at progressively higher resolutions. This
-                    reduces the search space from potentially thousands of pixels to manageable ranges at each scale.
+                    <strong>Pyramid-based Alignment:</strong>
+                    For large images exceeding 400 pixels in height (tif), I implemented a multi-scale pyramid
+                    alignment approach that addresses the computational explosion. I downsampled four pyramid levels at
+                    100%,
+                    50%, 25%, and 12.5% of original resolution using skimage.transform.rescale, where each level
+                    preserves essential image features
+                    while dramatically reducing computational requirements.
                 </p>
+
+                <p style="margin-bottom: 20px; font-size: 1rem;">
+                    Then, The pyramids are reversed so the smallest images be processed first. Alignment begins at the
+                    lowest resolution because it is faster and less sensitive
+                    to local noise. Then, I align the images at each level using the NCC algorithm, while
+                    at the coarsest level, the search range is the full search_range [-15, 15].
+                    At finer levels, the search range is reduced (search_range // (2**level)) because only small
+                    refinements
+                    are needed, finding the best local shift between the two images at each level,
+                    and the result is added to the cumulative shift.
+                    If not at the first level, the previously found shift is doubled (to match the higher
+                    resolution) and
+                    applied to the current image using np.roll.
+                    The function simple_align is then called to estimate the best local shift between the two images
+                    at this
+                    level.
+                </p>
+
+                <p style="margin-bottom: 20px; font-size: 1rem;">
+                    After all pyramid levels are processed, the function returns: The total vertical and horizontal
+                    shift.
+                </p>
+
 
                 <p style="margin-bottom: 20px; font-size: 1rem;">
                     <strong>Computational Efficiency:</strong> Large TIF files (3000+ pixels) initially took less than
@@ -289,11 +329,10 @@
             </div>
         </div>
 
-
         <div class="gallery">
             <div class="image-card">
                 <div class="image-container">
-                    <img src="results/results_forCS180/cathedral_aligned.jpg" alt="Cathedral"
+                    <img src="./results/results_forCS180/cathedral_aligned.jpg" alt="Cathedral"
                         onclick="openModal(this.src)">
                 </div>
                 <div class="image-info">
