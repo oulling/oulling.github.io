@@ -209,6 +209,8 @@
     </style>
 </head>
 
+
+
 <body>
     <div class="container">
         <div style="margin-bottom: 30px;">
@@ -305,7 +307,27 @@
                 <p style="margin-bottom: 20px; font-size: 1rem;">
                     After all pyramid levels are processed, the function returns: The total vertical and horizontal
                     shift.
+                    Then, The pyramids are reversed so the smallest images be processed first. Alignment begins at the
+                    lowest resolution because it is faster and less sensitive
+                    to local noise. Then, I align the images at each level using the NCC algorithm, while
+                    at the coarsest level, the search range is the full search_range [-15, 15].
+                    At finer levels, the search range is reduced (search_range // (2**level)) because only small
+                    refinements
+                    are needed, finding the best local shift between the two images at each level,
+                    and the result is added to the cumulative shift.
+                    If not at the first level, the previously found shift is doubled (to match the higher
+                    resolution) and
+                    applied to the current image using np.roll.
+                    The function simple_align is then called to estimate the best local shift between the two images
+                    at this
+                    level.
                 </p>
+
+                <p style="margin-bottom: 20px; font-size: 1rem;">
+                    After all pyramid levels are processed, the function returns: The total vertical and horizontal
+                    shift.
+                </p>
+
 
 
                 <p style="margin-bottom: 20px; font-size: 1rem;">
@@ -332,7 +354,7 @@
         <div class="gallery">
             <div class="image-card">
                 <div class="image-container">
-                    <img src="results/results_forCS180/cathedral_aligned.jpg" alt="Cathedral"
+                    <img src="./results/results_forCS180/cathedral_aligned.jpg" alt="Cathedral"
                         onclick="openModal(this.src)">
                 </div>
                 <div class="image-info">
