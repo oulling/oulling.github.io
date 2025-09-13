@@ -263,16 +263,50 @@
                     uses Normalized Cross-Correlation (NCC) as the similarity metric to find the optimal alignment
                     between
                     the green and red channels relative to the blue channel (as in the Question).
+
+                    The implementation begins by standardizing both input images through a normalization process that
+                    subtracts
+                    the mean intensity and divides by the standard deviation, effectively transforming each image to
+                    have
+                    zero mean and unit variance. This critical preprocessing step ensures that the alignment is based on
+                    structural similarity patterns rather than absolute pixel values, which is essential for handling
+                    the
+                    inherent brightness differences between the Blue, Green, and Red channels in Prokudin-Gorskii
+                    images.
                 </p>
 
                 <p style="margin-bottom: 20px; font-size: 1rem;">
-                    <strong>Pyramid-based Alignment:</strong> For larger images (TIF format), I implemented a
-                    multi-scale pyramid
-                    approach. The algorithm recursively downsamples images, performs
-                    coarse
-                    alignment at lower resolutions, then refines the alignment at progressively higher resolutions. This
-                    reduces the search space from potentially thousands of pixels to manageable ranges at each scale.
+                    <strong>Pyramid-based Alignment:</strong>
+                    For large images exceeding 400 pixels in height (tif), I implemented a multi-scale pyramid
+                    alignment approach that addresses the computational explosion. I downsampled six pyramid levels at
+                    100%,
+                    50%, 25%, and 12.5% ... of original resolution using skimage.transform.rescale, where each level
+                    preserves essential image features
+                    while dramatically reducing computational requirements.
                 </p>
+
+                <p style="margin-bottom: 20px; font-size: 1rem;">
+                    Then, The pyramids are reversed so the smallest images be processed first. Alignment begins at the
+                    lowest resolution because it is faster and less sensitive
+                    to local noise. Then, I align the images at each level using the NCC algorithm, while
+                    at the coarsest level, the search range is the full search_range [-15, 15].
+                    At finer levels, the search range is reduced (search_range // (2**level)) because only small
+                    refinements
+                    are needed, finding the best local shift between the two images at each level,
+                    and the result is added to the cumulative shift.
+                    If not at the first level, the previously found shift is doubled (to match the higher
+                    resolution) and
+                    applied to the current image using np.roll.
+                    The function simple_align is then called to estimate the best local shift between the two images
+                    at this
+                    level.
+                </p>
+
+                <p style="margin-bottom: 20px; font-size: 1rem;">
+                    After all pyramid levels are processed, the function returns: The total vertical and horizontal
+                    shift.
+                </p>
+
 
                 <p style="margin-bottom: 20px; font-size: 1rem;">
                     <strong>Computational Efficiency:</strong> Large TIF files (3000+ pixels) initially took less than
@@ -285,10 +319,15 @@
                     <strong>Some problems:</strong> I have finding that for some images, the alignment is not perfect,
                     and it may be caused by different alignment methods. For most
                     images, NCC performs better than l2 distance, but for some images, l2 distance performs better than
-                    NCC, and I finally chose to use NCC for all images. Additionally, there are two images not aligned
-                    well enough by the naive alignment method, and I may try different methods later on.
+                    NCC, and I finally chose to use NCC for all images. And I found that for searching_range:
+                    (search_range // (2**level)),
+                    if (serach_range) for all stage, there is one image better, but one blurrer . Additionally, there
+                    are one images not aligned
+                    well enough by the naive alignment method, may be caused by the image color is not fit on my
+                    hyper-parameter.
             </div>
         </div>
+
 
         <div class="gallery">
             <div class="image-card">
@@ -305,7 +344,7 @@
                         <div><strong>Red shift:</strong> (12, 3)</div>
                         <div><strong>Method:</strong> single-scale</div>
                         <div><strong>Size:</strong> (341, 390)</div>
-                        <div><strong>Time:</strong> 2.70s</div>
+                        <div><strong>Time:</strong> 3.33s</div>
                     </div>
                 </div>
             </div>
@@ -319,11 +358,11 @@
                     <div class="image-filename">church_aligned.jpg</div>
                     <div
                         style="margin-top: 10px; font-size: 0.8rem; color: #666; background: #f8f9fa; padding: 8px; border-radius: 5px;">
-                        <div><strong>Green shift:</strong> (13, -5)</div>
-                        <div><strong>Red shift:</strong> (56, -5)</div>
+                        <div><strong>Green shift:</strong> (28, 0)</div>
+                        <div><strong>Red shift:</strong> (60, -4)</div>
                         <div><strong>Method:</strong> pyramid</div>
                         <div><strong>Size:</strong> (3202, 3634)</div>
-                        <div><strong>Time:</strong> 35.88s</div>
+                        <div><strong>Time:</strong> 4.86s</div>
                     </div>
                 </div>
             </div>
@@ -337,11 +376,11 @@
                     <div class="image-filename">emir_aligned.jpg</div>
                     <div
                         style="margin-top: 10px; font-size: 0.8rem; color: #666; background: #f8f9fa; padding: 8px; border-radius: 5px;">
-                        <div><strong>Green shift:</strong> (41, 17)</div>
-                        <div><strong>Red shift:</strong> (101, 37)</div>
+                        <div><strong>Green shift:</strong> (44, 20)</div>
+                        <div><strong>Red shift:</strong> (120, -188)</div>
                         <div><strong>Method:</strong> pyramid</div>
                         <div><strong>Size:</strong> (3209, 3702)</div>
-                        <div><strong>Time:</strong> 39.30s</div>
+                        <div><strong>Time:</strong> 4.89s</div>
                     </div>
                 </div>
             </div>
@@ -356,11 +395,11 @@
                     <div class="image-filename">harvesters_aligned.jpg</div>
                     <div
                         style="margin-top: 10px; font-size: 0.8rem; color: #666; background: #f8f9fa; padding: 8px; border-radius: 5px;">
-                        <div><strong>Green shift:</strong> (59, 10)</div>
-                        <div><strong>Red shift:</strong> (120, 7)</div>
+                        <div><strong>Green shift:</strong> (60, 12)</div>
+                        <div><strong>Red shift:</strong> (124, 12)</div>
                         <div><strong>Method:</strong> pyramid</div>
                         <div><strong>Size:</strong> (3218, 3683)</div>
-                        <div><strong>Time:</strong> 40.21s</div>
+                        <div><strong>Time:</strong> 6.16s</div>
                     </div>
                 </div>
             </div>
@@ -374,11 +413,11 @@
                     <div class="image-filename">icon_aligned.jpg</div>
                     <div
                         style="margin-top: 10px; font-size: 0.8rem; color: #666; background: #f8f9fa; padding: 8px; border-radius: 5px;">
-                        <div><strong>Green shift:</strong> (42, 16)</div>
-                        <div><strong>Red shift:</strong> (88, 22)</div>
+                        <div><strong>Green shift:</strong> (44, 16)</div>
+                        <div><strong>Red shift:</strong> (92, 20)</div>
                         <div><strong>Method:</strong> pyramid</div>
                         <div><strong>Size:</strong> (3244, 3741)</div>
-                        <div><strong>Time:</strong> 40.63s</div>
+                        <div><strong>Time:</strong> 5.15s</div>
                     </div>
                 </div>
             </div>
@@ -392,11 +431,11 @@
                     <div class="image-filename">italil_aligned.jpg</div>
                     <div
                         style="margin-top: 10px; font-size: 0.8rem; color: #666; background: #f8f9fa; padding: 8px; border-radius: 5px;">
-                        <div><strong>Green shift:</strong> (38, 18)</div>
-                        <div><strong>Red shift:</strong> (78, 34)</div>
+                        <div><strong>Green shift:</strong> (36, 16)</div>
+                        <div><strong>Red shift:</strong> (80, 32)</div>
                         <div><strong>Method:</strong> pyramid</div>
                         <div><strong>Size:</strong> (3231, 3719)</div>
-                        <div><strong>Time:</strong> 36.24s</div>
+                        <div><strong>Time:</strong> 4.95s</div>
                     </div>
                 </div>
             </div>
@@ -411,11 +450,11 @@
                     <div class="image-filename">lastochikino_aligned.jpg</div>
                     <div
                         style="margin-top: 10px; font-size: 0.8rem; color: #666; background: #f8f9fa; padding: 8px; border-radius: 5px;">
-                        <div><strong>Green shift:</strong> (-3, -2)</div>
-                        <div><strong>Red shift:</strong> (73, -7)</div>
+                        <div><strong>Green shift:</strong> (-4, -4)</div>
+                        <div><strong>Red shift:</strong> (72, -4)</div>
                         <div><strong>Method:</strong> pyramid</div>
                         <div><strong>Size:</strong> (3241, 3700)</div>
-                        <div><strong>Time:</strong> 49.93s</div>
+                        <div><strong>Time:</strong> 5.09s</div>
                     </div>
                 </div>
             </div>
@@ -429,11 +468,11 @@
                     <div class="image-filename">lugano_aligned.jpg</div>
                     <div
                         style="margin-top: 10px; font-size: 0.8rem; color: #666; background: #f8f9fa; padding: 8px; border-radius: 5px;">
-                        <div><strong>Green shift:</strong> (33, -11)</div>
+                        <div><strong>Green shift:</strong> (40, -12)</div>
                         <div><strong>Red shift:</strong> (92, -28)</div>
                         <div><strong>Method:</strong> pyramid</div>
                         <div><strong>Size:</strong> (3244, 3779)</div>
-                        <div><strong>Time:</strong> 68.74s</div>
+                        <div><strong>Time:</strong> 6.67s</div>
                     </div>
                 </div>
             </div>
@@ -447,11 +486,11 @@
                     <div class="image-filename">melons_aligned.jpg</div>
                     <div
                         style="margin-top: 10px; font-size: 0.8rem; color: #666; background: #f8f9fa; padding: 8px; border-radius: 5px;">
-                        <div><strong>Green shift:</strong> (83, 4)</div>
-                        <div><strong>Red shift:</strong> (155, -1)</div>
+                        <div><strong>Green shift:</strong> (84, 4)</div>
+                        <div><strong>Red shift:</strong> (176, 8)</div>
                         <div><strong>Method:</strong> pyramid</div>
                         <div><strong>Size:</strong> (3241, 3770)</div>
-                        <div><strong>Time:</strong> 37.80s</div>
+                        <div><strong>Time:</strong> 5.23s</div>
                     </div>
                 </div>
             </div>
@@ -470,7 +509,7 @@
                         <div><strong>Red shift:</strong> (3, 2)</div>
                         <div><strong>Method:</strong> single-scale</div>
                         <div><strong>Size:</strong> (341, 391)</div>
-                        <div><strong>Time:</strong> 2.93s</div>
+                        <div><strong>Time:</strong> 3.01s</div>
                     </div>
                 </div>
             </div>
@@ -485,11 +524,11 @@
                     <div class="image-filename">self_portrait_aligned.jpg</div>
                     <div
                         style="margin-top: 10px; font-size: 0.8rem; color: #666; background: #f8f9fa; padding: 8px; border-radius: 5px;">
-                        <div><strong>Green shift:</strong> (73, -1)</div>
-                        <div><strong>Red shift:</strong> (121, -5)</div>
+                        <div><strong>Green shift:</strong> (80, 20)</div>
+                        <div><strong>Red shift:</strong> (172, 28)</div>
                         <div><strong>Method:</strong> pyramid</div>
                         <div><strong>Size:</strong> (3251, 3810)</div>
-                        <div><strong>Time:</strong> 37.97s</div>
+                        <div><strong>Time:</strong> 5.04s</div>
                     </div>
                 </div>
             </div>
@@ -504,8 +543,11 @@
                     <div class="image-filename">service-pnp-prok-00100-00195v_aligned.jpg</div>
                     <div
                         style="margin-top: 10px; font-size: 0.8rem; color: #666; background: #f8f9fa; padding: 8px; border-radius: 5px;">
-                        <div><strong>Additional image</strong> </div>
-
+                        <div><strong>Green shift:</strong> (4, 0)</div>
+                        <div><strong>Red shift:</strong> (15, 0)</div>
+                        <div><strong>Method:</strong> single-scale</div>
+                        <div><strong>Size:</strong> (341, 399)</div>
+                        <div><strong>Time:</strong> 3.21s</div>
                     </div>
                 </div>
             </div>
@@ -519,11 +561,11 @@
                     <div class="image-filename">siren_aligned.jpg</div>
                     <div
                         style="margin-top: 10px; font-size: 0.8rem; color: #666; background: #f8f9fa; padding: 8px; border-radius: 5px;">
-                        <div><strong>Green shift:</strong> (48, -7)</div>
-                        <div><strong>Red shift:</strong> (96, -21)</div>
+                        <div><strong>Green shift:</strong> (48, -8)</div>
+                        <div><strong>Red shift:</strong> (96, -20)</div>
                         <div><strong>Method:</strong> pyramid</div>
                         <div><strong>Size:</strong> (3250, 3817)</div>
-                        <div><strong>Time:</strong> 43.95s</div>
+                        <div><strong>Time:</strong> 5.08s</div>
                     </div>
                 </div>
             </div>
@@ -538,11 +580,11 @@
                     <div class="image-filename">three_generations_aligned.jpg</div>
                     <div
                         style="margin-top: 10px; font-size: 0.8rem; color: #666; background: #f8f9fa; padding: 8px; border-radius: 5px;">
-                        <div><strong>Green shift:</strong> (52, 5)</div>
-                        <div><strong>Red shift:</strong> (109, 7)</div>
+                        <div><strong>Green shift:</strong> (52, 4)</div>
+                        <div><strong>Red shift:</strong> (108, 8)</div>
                         <div><strong>Method:</strong> pyramid</div>
                         <div><strong>Size:</strong> (3209, 3714)</div>
-                        <div><strong>Time:</strong> 64.04s</div>
+                        <div><strong>Time:</strong> 6.81s</div>
                     </div>
                 </div>
             </div>
@@ -560,7 +602,7 @@
                         <div><strong>Red shift:</strong> (6, 3)</div>
                         <div><strong>Method:</strong> single-scale</div>
                         <div><strong>Size:</strong> (341, 396)</div>
-                        <div><strong>Time:</strong> 3.38s</div>
+                        <div><strong>Time:</strong> 3.05s</div>
                     </div>
                 </div>
             </div>

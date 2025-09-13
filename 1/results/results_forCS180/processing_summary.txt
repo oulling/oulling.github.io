@@ -1,126 +1,112 @@
 PROCESSING SUMMARY
 ==================================================
 
-Total images processed: 17
-Total processing time: 503.84 seconds
-Average time per image: 29.64 seconds
+Total images processed: 15
+Total processing time: 72.53 seconds
+Average time per image: 4.84 seconds
 
 File: cathedral.jpg
   Green shift: (5, 2)
   Red shift: (12, 3)
   Method: single-scale
   Size: (341, 390)
-  Time: 2.70s
+  Time: 3.33s
 
 File: monastery.jpg
   Green shift: (-3, 2)
   Red shift: (3, 2)
   Method: single-scale
   Size: (341, 391)
-  Time: 2.93s
+  Time: 3.01s
 
-File: service-pnp-prok-00000-00082_150px.jpg
-  Green shift: (0, 0)
-  Red shift: (0, 0)
+File: service-pnp-prok-00100-00195v.jpg
+  Green shift: (4, 0)
+  Red shift: (15, 0)
   Method: single-scale
-  Size: (50, 59)
-  Time: 0.05s
-
-File: service-pnp-prok-00100-00163_150px.jpg
-  Green shift: (0, 0)
-  Red shift: (0, 0)
-  Method: single-scale
-  Size: (50, 57)
-  Time: 0.05s
-
-File: service-pnp-prok-00100-00170_150px.jpg
-  Green shift: (0, 0)
-  Red shift: (0, 0)
-  Method: single-scale
-  Size: (50, 58)
-  Time: 0.05s
+  Size: (341, 399)
+  Time: 3.21s
 
 File: tobolsk.jpg
   Green shift: (3, 3)
   Red shift: (6, 3)
   Method: single-scale
   Size: (341, 396)
-  Time: 3.38s
+  Time: 3.05s
 
 File: church.tif
-  Green shift: (13, -5)
-  Red shift: (56, -5)
+  Green shift: (28, 0)
+  Red shift: (60, -4)
   Method: pyramid
   Size: (3202, 3634)
-  Time: 35.88s
+  Time: 4.86s
 
 File: emir.tif
-  Green shift: (41, 17)
-  Red shift: (101, 37)
+  Green shift: (44, 20)
+  Red shift: (120, -188)
   Method: pyramid
   Size: (3209, 3702)
-  Time: 39.30s
+  Time: 4.89s
 
 File: harvesters.tif
-  Green shift: (59, 10)
-  Red shift: (120, 7)
+  Green shift: (60, 12)
+  Red shift: (124, 12)
   Method: pyramid
   Size: (3218, 3683)
-  Time: 40.21s
+  Time: 6.16s
 
 File: icon.tif
-  Green shift: (42, 16)
-  Red shift: (88, 22)
+  Green shift: (44, 16)
+  Red shift: (92, 20)
   Method: pyramid
   Size: (3244, 3741)
-  Time: 40.63s
+  Time: 5.15s
 
 File: italil.tif
-  Green shift: (38, 18)
-  Red shift: (78, 34)
+  Green shift: (36, 16)
+  Red shift: (80, 32)
   Method: pyramid
   Size: (3231, 3719)
-  Time: 36.24s
+  Time: 4.95s
 
 File: lastochikino.tif
-  Green shift: (-3, -2)
-  Red shift: (73, -7)
+  Green shift: (-4, -4)
+  Red shift: (72, -4)
   Method: pyramid
   Size: (3241, 3700)
-  Time: 49.93s
+  Time: 5.09s
 
 File: lugano.tif
-  Green shift: (33, -11)
+  Green shift: (40, -12)
   Red shift: (92, -28)
   Method: pyramid
   Size: (3244, 3779)
-  Time: 68.74s
+  Time: 6.67s
 
 File: melons.tif
-  Green shift: (83, 4)
-  Red shift: (155, -1)
+  Green shift: (84, 4)
+  Red shift: (176, 8)
   Method: pyramid
   Size: (3241, 3770)
-  Time: 37.80s
+  Time: 5.23s
 
 File: self_portrait.tif
-  Green shift: (73, -1)
-  Red shift: (121, -5)
+  Green shift: (80, 20)
+  Red shift: (172, 28)
   Method: pyramid
   Size: (3251, 3810)
-  Time: 37.97s
+  Time: 5.04s
 
 File: siren.tif
-  Green shift: (48, -7)
-  Red shift: (96, -21)
+  Green shift: (48, -8)
+  Red shift: (96, -20)
   Method: pyramid
   Size: (3250, 3817)
-  Time: 43.95s
+  Time: 5.08s
 
 File: three_generations.tif
-  Green shift: (52, 5)
-  Red shift: (109, 7)
+  Green shift: (52, 4)
+  Red shift: (108, 8)
   Method: pyramid
   Size: (3209, 3714)
-  Time: 64.04s
+  Time: 6.81s
 
