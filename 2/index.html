@@ -1,0 +1,1939 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CS180 Project 2: Fun with Filters and Frequencies</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-link {
+            margin-bottom: 30px;
+        }
+
+        .back-link a {
+            display: inline-flex;
+            align-items: center;
+            padding: 10px 20px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .back-link a:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+            background: linear-gradient(45deg, #764ba2, #667eea);
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+            padding: 40px 0;
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 20px;
+        }
+
+        .description {
+            max-width: 800px;
+            margin: 0 auto;
+            font-size: 1rem;
+            opacity: 0.8;
+            line-height: 1.8;
+        }
+
+        .project-overview {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 40px;
+            margin: 40px 0;
+            color: white;
+        }
+
+        .project-overview h2 {
+            color: white;
+            margin-bottom: 30px;
+            font-size: 2rem;
+            text-align: center;
+        }
+
+        .project-overview h3 {
+            color: white;
+            margin: 30px 0 20px 0;
+            font-size: 1.5rem;
+        }
+
+        .project-overview p {
+            margin-bottom: 20px;
+            font-size: 1rem;
+            line-height: 1.8;
+        }
+
+        .section-header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 40px 0 30px 0;
+            color: white;
+            text-align: center;
+        }
+
+        .section-header h2 {
+            color: white;
+            margin-bottom: 15px;
+            font-size: 1.8rem;
+        }
+
+        .section-description {
+            font-size: 1rem;
+            opacity: 0.9;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+            align-items: start;
+        }
+
+        .image-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .image-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .image-container {
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #f8f9fa;
+            min-height: 200px;
+        }
+
+        .image-container img {
+            width: 100%;
+            height: auto;
+            max-height: 400px;
+            object-fit: contain;
+            transition: transform 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        .image-card:hover .image-container img {
+            transform: scale(1.05);
+        }
+
+        .image-info {
+            padding: 20px;
+        }
+
+        .image-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 8px;
+            text-transform: capitalize;
+        }
+
+        .image-filename {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+            font-family: 'Courier New', monospace;
+            background: #f8f9fa;
+            padding: 5px 10px;
+            border-radius: 5px;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+
+        .image-description {
+            font-size: 0.9rem;
+            color: #666;
+            line-height: 1.5;
+        }
+
+        footer {
+            text-align: center;
+            color: white;
+            margin-top: 60px;
+            padding: 40px 0;
+            opacity: 0.7;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+        }
+
+        .modal-content {
+            margin: auto;
+            display: block;
+            max-width: 90%;
+            max-height: 90%;
+            margin-top: 2%;
+        }
+
+        .close {
+            position: absolute;
+            top: 15px;
+            right: 35px;
+            color: #f1f1f1;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: #bbb;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            .gallery {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .container {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="back-link">
+            <a href="../index.html">← Back to Home</a>
+        </div>
+
+        <header>
+            <h1>Fun with Filters and Frequencies</h1>
+            <p class="subtitle">CS180 Project 2: Image Processing Fundamentals</p>
+            <p class="description">
+                This project explores fundamental concepts in digital image processing, including edge detection,
+                frequency domain filtering, and gradient analysis. Through various filtering techniques and frequency
+                manipulations, we demonstrate how different operations affect image characteristics and visual
+                perception.
+            </p>
+        </header>
+
+        <!-- Section 1.1: Edge Detection and Gradient Analysis -->
+        <div class="section-header">
+            <h2>1.1 Convolution Implementation</h2>
+            <p class="section-description">
+                This section demonstrates the fundamental concepts of convolution and edge detection through gradient
+                computation.
+                We implement convolution from scratch using different approaches, then apply finite difference operators
+                to detect edges in images.
+            </p>
+        </div>
+
+        <div class="project-overview">
+            <h2>Convolution Implementation</h2>
+            <div style="max-width: 1000px; margin: 0 auto; line-height: 1.8;">
+                <p>
+                    First, let's recap what a convolution is. We implemented it with four for loops, then two for loops,
+                    and compared it with a built-in convolution function scipy.signal.convolve2d! Then, we took a
+                    picture
+                    of ourselves (and read it as grayscale), wrote out a 9x9 box filter, and convolved the picture with
+                    the box filter. We also did it with the finite difference operators Dx and Dy.
+                </p>
+
+                <h3>Performance Comparison</h3>
+                <div style="background: rgba(255, 255, 255, 0.1); padding: 20px; border-radius: 10px; margin: 20px 0;">
+                    <p><strong>Four loops implementation:</strong> 3.152167 seconds</p>
+                    <p><strong>Two loops implementation:</strong> 2.628052 seconds</p>
+                    <p><strong>Scipy built-in function:</strong> 0.018000 seconds</p>
+                    <br>
+                    <p><strong>Accuracy verification:</strong></p>
+                    <p>• Max difference between result_4loops and result_scipy: 0.0000000000</p>
+                    <p>• Max difference between result_2loops and result_scipy: 0.0000000000</p>
+                    <p>• Max difference between result_4loops and result_2loops: 0.0000000000</p>
+                </div>
+
+                <h3>Code snippets</h3>
+
+                <div
+                    style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0; font-family: 'Courier New', monospace; font-size: 0.9rem;">
+                    <h4 style="color: #333; margin-bottom: 15px;">Four Loops Convolution:</h4>
+                    <pre style="margin: 0; color: #333;">
+def convolution_4loops(image: np.array, kernel: np.array, mode: str = 'same'):
+    """
+    use 4 loops to implement the convolution with zero padding
+    Args:
+        image: input image
+        kernel: convolution kernel
+        mode: 'valid', 'same', or 'full'
+    """
+    img_h, img_w = image.shape
+    ker_h, ker_w = kernel.shape
+
+    if mode == 'valid':
+        # No padding, original behavior
+        out_h = img_h - ker_h + 1
+        out_w = img_w - ker_w + 1
+        pad_h, pad_w = 0, 0
+        padded_image = image
+        
+    elif mode == 'same':
+        # Pad to keep output size same as input
+        out_h, out_w = img_h, img_w
+        pad_h = ker_h // 2
+        pad_w = ker_w // 2
+        # Create zero-padded image
+        padded_image = np.zeros((img_h + 2*pad_h, img_w + 2*pad_w))
+        padded_image[pad_h:pad_h+img_h, pad_w:pad_w+img_w] = image
+        
+    elif mode == 'full':
+        # Pad to get full convolution result
+        out_h = img_h + ker_h - 1
+        out_w = img_w + ker_w - 1
+        pad_h, pad_w = ker_h - 1, ker_w - 1
+        # Create zero-padded image
+        padded_image = np.zeros((img_h + 2*pad_h, img_w + 2*pad_w))
+        padded_image[pad_h:pad_h+img_h, pad_w:pad_w+img_w] = image
+
+    output = np.zeros((out_h, out_w))
+
+    # first two loops over the output(h,w)
+    for i in range(out_h):
+        for j in range(out_w):
+            # second two loops calculate each pixel
+            output[i,j] = 0
+            for k_i in range(ker_h):
+                for k_j in range(ker_w):
+                    output[i,j] = output[i,j] + padded_image[i+k_i, j+k_j] * kernel[k_i, k_j]
+                    
+    return output
+    </pre>
+                </div>
+
+                <div
+                    style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0; font-family: 'Courier New', monospace; font-size: 0.9rem;">
+                    <h4 style="color: #333; margin-bottom: 15px;">Two Loops Convolution:</h4>
+                    <pre style="margin: 0; color: #333;">
+def convolution_2loops(image: np.array, kernel: np.array, mode: str = 'same'):
+    """
+    use 2 loops to implement the convolution with zero padding
+    Args:
+        image: input image
+        kernel: convolution kernel
+        mode: 'valid', 'same', or 'full'
+    """
+    img_h, img_w = image.shape
+    ker_h, ker_w = kernel.shape
+
+    if mode == 'valid':
+        # No padding, original behavior
+        out_h = img_h - ker_h + 1
+        out_w = img_w - ker_w + 1
+        pad_h, pad_w = 0, 0
+        padded_image = image
+        
+    elif mode == 'same':
+        # Pad to keep output size same as input
+        out_h, out_w = img_h, img_w
+        pad_h = ker_h // 2
+        pad_w = ker_w // 2
+        # Create zero-padded image
+        padded_image = np.zeros((img_h + 2*pad_h, img_w + 2*pad_w))
+        padded_image[pad_h:pad_h+img_h, pad_w:pad_w+img_w] = image
+        
+    elif mode == 'full':
+        # Pad to get full convolution result
+        out_h = img_h + ker_h - 1
+        out_w = img_w + ker_w - 1
+        pad_h, pad_w = ker_h - 1, ker_w - 1
+        # Create zero-padded image
+        padded_image = np.zeros((img_h + 2*pad_h, img_w + 2*pad_w))
+        padded_image[pad_h:pad_h+img_h, pad_w:pad_w+img_w] = image
+
+    output = np.zeros((out_h, out_w))
+
+    # two loops over the output(h,w)
+    for i in range(out_h):
+        for j in range(out_w):
+            output[i,j] = np.sum(padded_image[i:i+ker_h, j:j+ker_w] * kernel)
+
+    return output</pre>
+                </div>
+
+                <div
+                    style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0; font-family: 'Courier New', monospace; font-size: 0.9rem;">
+                    <h4 style="color: #333; margin-bottom: 15px;">Finite Difference Operators:</h4>
+                    <pre style="margin: 0; color: #333;"># Dx operator (detects vertical edges)
+Dx = np.array([1,0,-1])
+
+# Dy operator (detects horizontal edges)  
+Dy = np.array([1],[0],[-1])
+
+# Apply operators
+dx_result = signal.convolve2d(original, Dx, mode='same')
+dy_result = signal.convolve2d(original, Dy, mode='same')
+
+# Compute gradient magnitude
+gradient_magnitude = np.sqrt(dx_result**2 + dy_result**2)</pre>
+                </div>
+
+                <h3>Results Analysis</h3>
+                <p>
+                    The performance comparison is using different convolution implementations to (1000,1000) image with
+                    a 3x3 box filter.
+                    The performance comparison shows that while our custom implementations are functionally correct
+                    (zero difference with scipy), the built-in scipy function is significantly faster, maybe due to
+                    optimized C implementations. The two-loop version outperforms the four-loop version by
+                    leveraging numpy's vectorized operations more effectively. And the following pictures are the
+                    results of the convolution and the finite difference operators. While the finite difference
+                    operators is standardizing (0,1) After convolution (Dx and Dy). And, I provide a mode for
+                    convolution, if entering as 'same' mode, just the result I galleryed, is padding the boundary with
+                    0 (kernal_size//2).
+                </p>
+            </div>
+        </div>
+
+        <div class="gallery">
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="media/1.1/photo.jpg" alt="Original Photo" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Original Photo</div>
+                    <div class="image-filename">photo.jpg</div>
+                    <div class="image-description">
+                        The original input image used for all subsequent processing operations and analysis.
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="media/1.1/gray_photo.jpg" alt="Grayscale Photo" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Grayscale Photo</div>
+                    <div class="image-filename">gray_photo.jpg</div>
+                    <div class="image-description">
+                        Converted to grayscale for edge detection and gradient analysis operations.
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="media/1.1/dx_photo.jpg" alt="X Gradient" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">X Gradient</div>
+                    <div class="image-filename">dx_photo.jpg</div>
+                    <div class="image-description">
+                        Partial derivative in the x-direction, highlighting vertical edges and structures.
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="media/1.1/dy_photo.jpg" alt="Y Gradient" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Y Gradient</div>
+                    <div class="image-filename">dy_photo.jpg</div>
+                    <div class="image-description">
+                        Partial derivative in the y-direction, highlighting horizontal edges and structures.
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="media/1.1/gradient_photo.jpg" alt="Gradient Magnitude" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Gradient Magnitude</div>
+                    <div class="image-filename">gradient_photo.jpg</div>
+                    <div class="image-description">
+                        Combined gradient magnitude showing overall edge strength and structural features.
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="media/1.1/filtered_9x9_photo.jpg" alt="Filtered 9x9" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Filtered (9x9)</div>
+                    <div class="image-filename">filtered_9x9_photo.jpg</div>
+                    <div class="image-description">
+                        Result of applying a 9x9 filter for noise reduction and smoothing effects.
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="media/1.1/complete_analysis.png" alt="Complete Analysis" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Complete Analysis</div>
+                    <div class="image-filename">complete_analysis.png</div>
+                    <div class="image-description">
+                        Comprehensive analysis showing all processing steps and their comparative results.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 1.2: Edge Detection with Cameraman Image -->
+        <div class="section-header">
+            <h2>1.2 Edge Detection with Cameraman Image</h2>
+            <p class="section-description">
+                This section demonstrates edge detection using finite difference operators on the classic cameraman
+                image.
+                We compute partial derivatives in x and y directions, then create a gradient magnitude image and
+                binarize it with different thresholds to extract edge information.
+            </p>
+        </div>
+
+        <div class="project-overview">
+            <h2>Edge Detection Process</h2>
+            <div style="max-width: 1000px; margin: 0 auto; line-height: 1.8;">
+                <p>
+                    We applied finite difference operators D_x and D_y to the cameraman image to compute partial
+                    derivatives.
+                    The gradient magnitude was calculated as the square root of the sum of squared derivatives.
+                    Finally, we binarized the gradient magnitude image using different thresholds to extract edge
+                    information,
+                    with threshold 0.21 providing the best balance between noise suppression and edge preservation.
+                </p>
+            </div>
+        </div>
+
+        <div class="gallery">
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="media/1.2/cameraman.png" alt="Original Cameraman" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Original Cameraman</div>
+                    <div class="image-filename">cameraman.png</div>
+                    <div class="image-description">
+                        The classic cameraman test image used for edge detection analysis.
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="media/1.2/partial_x_cameraman.jpg" alt="Partial X Derivative"
+                        onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Partial X Derivative</div>
+                    <div class="image-filename">partial_x_cameraman.jpg</div>
+                    <div class="image-description">
+                        Partial derivative in x-direction using finite difference operator D_x, highlighting vertical
+                        edges.
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="media/1.2/partial_y_cameraman.jpg" alt="Partial Y Derivative"
+                        onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Partial Y Derivative</div>
+                    <div class="image-filename">partial_y_cameraman.jpg</div>
+                    <div class="image-description">
+                        Partial derivative in y-direction using finite difference operator D_y, highlighting horizontal
+                        edges.
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="media/1.2/gradient_magnitude_cameraman.jpg" alt="Gradient Magnitude"
+                        onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Gradient Magnitude</div>
+                    <div class="image-filename">gradient_magnitude_cameraman.jpg</div>
+                    <div class="image-description">
+                        Combined gradient magnitude showing overall edge strength and structural features.
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="media/1.2/binary_edge_thresh_0.21_cameraman.jpg" alt="Binary Edge (Threshold 0.21)"
+                        onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Binary Edge (Threshold 0.21)</div>
+                    <div class="image-filename">binary_edge_thresh_0.21_cameraman.jpg</div>
+                    <div class="image-description">
+                        Binarized gradient magnitude with threshold 0.21, providing optimal balance between noise
+                        suppression and edge preservation.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Threshold Comparison Section -->
+        <div class="section-header">
+            <h2>Threshold Comparison</h2>
+            <p class="section-description">
+                Different threshold values for binarizing the gradient magnitude image. Lower thresholds capture more
+                details
+                but may include noise, while higher thresholds suppress noise but may miss subtle edges.
+            </p>
+        </div>
+
+        <div class="gallery" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+            <div class="image-card" style="transform: scale(0.8);">
+                <div class="image-container">
+                    <img src="media/1.2/binary_edge_thresh_0.15_cameraman.jpg" alt="Threshold 0.15"
+                        onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Threshold 0.15</div>
+                    <div class="image-filename">binary_edge_thresh_0.15_cameraman.jpg</div>
+                    <div class="image-description">
+                        Lower threshold captures more details but includes noise.
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-card" style="transform: scale(0.8);">
+                <div class="image-container">
+                    <img src="media/1.2/binary_edge_thresh_0.16_cameraman.jpg" alt="Threshold 0.16"
+                        onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Threshold 0.16</div>
+                    <div class="image-filename">binary_edge_thresh_0.16_cameraman.jpg</div>
+                    <div class="image-description">
+                        Slightly higher threshold reduces some noise.
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-card" style="transform: scale(0.8);">
+                <div class="image-container">
+                    <img src="media/1.2/binary_edge_thresh_0.17_cameraman.jpg" alt="Threshold 0.17"
+                        onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Threshold 0.17</div>
+                    <div class="image-filename">binary_edge_thresh_0.17_cameraman.jpg</div>
+                    <div class="image-description">
+                        Continuing to reduce noise while preserving edges.
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-card" style="transform: scale(0.8);">
+                <div class="image-container">
+                    <img src="media/1.2/binary_edge_thresh_0.18_cameraman.jpg" alt="Threshold 0.18"
+                        onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Threshold 0.18</div>
+                    <div class="image-filename">binary_edge_thresh_0.18_cameraman.jpg</div>
+                    <div class="image-description">
+                        Good balance between noise and edge preservation.
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-card" style="transform: scale(0.8);">
+                <div class="image-container">
+                    <img src="media/1.2/binary_edge_thresh_0.19_cameraman.jpg" alt="Threshold 0.19"
+                        onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Threshold 0.19</div>
+                    <div class="image-filename">binary_edge_thresh_0.19_cameraman.jpg</div>
+                    <div class="image-description">
+                        Approaching optimal threshold value.
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-card" style="transform: scale(0.8);">
+                <div class="image-container">
+                    <img src="media/1.2/binary_edge_thresh_0.2_cameraman.jpg" alt="Threshold 0.20"
+                        onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Threshold 0.20</div>
+                    <div class="image-filename">binary_edge_thresh_0.2_cameraman.jpg</div>
+                    <div class="image-description">
+                        Close to optimal threshold for edge detection.
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-card" style="transform: scale(0.8);">
+                <div class="image-container">
+                    <img src="media/1.2/binary_edge_thresh_0.22_cameraman.jpg" alt="Threshold 0.22"
+                        onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Threshold 0.22</div>
+                    <div class="image-filename">binary_edge_thresh_0.22_cameraman.jpg</div>
+                    <div class="image-description">
+                        Higher threshold may lose some subtle edges.
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-card" style="transform: scale(0.8);">
+                <div class="image-container">
+                    <img src="media/1.2/binary_edge_thresh_0.23_cameraman.jpg" alt="Threshold 0.23"
+                        onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Threshold 0.23</div>
+                    <div class="image-filename">binary_edge_thresh_0.23_cameraman.jpg</div>
+                    <div class="image-description">
+                        Higher threshold suppresses more noise but may miss details.
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-card" style="transform: scale(0.8);">
+                <div class="image-container">
+                    <img src="media/1.2/binary_edge_thresh_0.24_cameraman.jpg" alt="Threshold 0.24"
+                        onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Threshold 0.24</div>
+                    <div class="image-filename">binary_edge_thresh_0.24_cameraman.jpg</div>
+                    <div class="image-description">
+                        Highest threshold shown, may lose important edge information.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 1.3: Derivative of Gaussian (DoG) Filter -->
+        <div class="section-header">
+            <h2>1.3 Derivative of Gaussian (DoG) Filter</h2>
+            <p class="section-description">
+                This section demonstrates how Gaussian smoothing can reduce noise in edge detection. We first blur the
+                image
+                with a Gaussian filter, then apply finite difference operators. Finally, we create Derivative of
+                Gaussian
+                filters by convolving Gaussian kernels with difference operators for more efficient edge detection.
+            </p>
+        </div>
+
+        <div class="project-overview">
+            <h2>DoG Filter Implementation</h2>
+            <div style="max-width: 1000px; margin: 0 auto; line-height: 1.8;">
+                <p>
+                    The finite difference operators alone produce noisy results. To address this, we first apply
+                    Gaussian
+                    smoothing to reduce noise, then compute derivatives. This two-step process can be combined into a
+                    single
+                    convolution using Derivative of Gaussian (DoG) filters, which are created by convolving Gaussian
+                    kernels
+                    with difference operators D_x and D_y.
+                </p>
+
+
+            </div>
+        </div>
+
+        <!-- Gaussian Blurred Results -->
+        <div class="section-header">
+            <h2>Gaussian Blurred Edge Detection</h2>
+            <p class="section-description">
+                Results after applying Gaussian smoothing followed by finite difference operators. Notice the
+                significant
+                reduction in noise compared to the direct application of difference operators.
+            </p>
+        </div>
+
+        <div class="gallery">
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="media/1.3/blurred_image_cameraman.jpg" alt="Gaussian Blurred Image"
+                        onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Gaussian Blurred Image</div>
+                    <div class="image-filename">blurred_image_cameraman.jpg</div>
+                    <div class="image-description">
+                        Original cameraman image after Gaussian smoothing to reduce noise.
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="media/1.3/partial_x_cameraman_blurred.jpg" alt="X Derivative (Blurred)"
+                        onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">X Derivative (Blurred)</div>
+                    <div class="image-filename">partial_x_cameraman_blurred.jpg</div>
+                    <div class="image-description">
+                        Partial derivative in x-direction applied to Gaussian-blurred image.
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="media/1.3/partial_y_cameraman_blurred.jpg" alt="Y Derivative (Blurred)"
+                        onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Y Derivative (Blurred)</div>
+                    <div class="image-filename">partial_y_cameraman_blurred.jpg</div>
+                    <div class="image-description">
+                        Partial derivative in y-direction applied to Gaussian-blurred image.
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="media/1.3/gradient_magnitude_cameraman_blurred.jpg" alt="Gradient Magnitude (Blurred)"
+                        onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Gradient Magnitude (Blurred)</div>
+                    <div class="image-filename">gradient_magnitude_cameraman_blurred.jpg</div>
+                    <div class="image-description">
+                        Gradient magnitude computed from Gaussian-blurred derivatives.
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="media/1.3/binary_edge_thresh_0.21_cameraman.jpg" alt="Binary Edge (Blurred)"
+                        onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Binary Edge (Blurred)</div>
+                    <div class="image-filename">binary_edge_thresh_0.21_cameraman.jpg</div>
+                    <div class="image-description">
+                        Binarized gradient magnitude from Gaussian-blurred image with threshold 0.21.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DoG Filter Results -->
+        <div class="section-header">
+            <h2>Derivative of Gaussian (DoG) Filter Results</h2>
+            <p class="section-description">
+                Results using DoG filters that combine Gaussian smoothing and differentiation in a single convolution.
+                These results should match the two-step approach above, demonstrating computational efficiency.
+            </p>
+        </div>
+
+        <div class="gallery">
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="media/1.3/dog_x_filter_cameraman.jpg" alt="DoG X Filter" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">DoG X Filter</div>
+                    <div class="image-filename">dog_x_filter_cameraman.jpg</div>
+                    <div class="image-description">
+                        Derivative of Gaussian filter in x-direction applied directly to original image.
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="media/1.3/dog_y_filter_cameraman.jpg" alt="DoG Y Filter" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">DoG Y Filter</div>
+                    <div class="image-filename">dog_y_filter_cameraman.jpg</div>
+                    <div class="image-description">
+                        Derivative of Gaussian filter in y-direction applied directly to original image.
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="media/1.3/partial_x_cameraman_dog.jpg" alt="DoG X Result" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">DoG X Result</div>
+                    <div class="image-filename">partial_x_cameraman_dog.jpg</div>
+                    <div class="image-description">
+                        X-direction derivative result using DoG filter approach.
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="media/1.3/partial_y_cameraman_dog.jpg" alt="DoG Y Result" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">DoG Y Result</div>
+                    <div class="image-filename">partial_y_cameraman_dog.jpg</div>
+                    <div class="image-description">
+                        Y-direction derivative result using DoG filter approach.
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="media/1.3/gradient_magnitude_cameraman_dog.jpg" alt="DoG Gradient Magnitude"
+                        onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">DoG Gradient Magnitude</div>
+                    <div class="image-filename">gradient_magnitude_cameraman_dog.jpg</div>
+                    <div class="image-description">
+                        Gradient magnitude computed from DoG filter results.
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="media/1.3/binary_edge_thresh_0.21_cameraman_dog.jpg" alt="DoG Binary Edge"
+                        onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">DoG Binary Edge</div>
+                    <div class="image-filename">binary_edge_thresh_0.21_cameraman_dog.jpg</div>
+                    <div class="image-description">
+                        Final binary edge image using DoG approach with threshold 0.21.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Additional Note -->
+        <div class="project-overview" style="margin-top: 30px;">
+            <h2>Method Comparison Note</h2>
+            <div style="max-width: 1000px; margin: 0 auto; line-height: 1.8;">
+                <p>
+                    There are slight differences between the results obtained from the two-step approach (Gaussian blur
+                    followed by finite difference operators)
+                    and the single-step DoG filter approach. While both methods should theoretically produce identical
+                    results,
+                    the observed discrepancies may be due to numerical precision differences, implementation details, or
+                    subtle variations
+                    in the convolution operations. The exact cause of these differences remains unclear and would
+                    require further investigation
+                    to fully understand the underlying factors.
+                </p>
+            </div>
+        </div>
+
+        <!-- Section 2.1: Unsharp Masking -->
+        <div class="section-header">
+            <h2>2.1 Unsharp Masking</h2>
+            <p class="section-description">
+                This section demonstrates the unsharp masking technique for image sharpening. We derive this technique
+                by
+                understanding how Gaussian filters act as low-pass filters, and how adding high-frequency components can
+                enhance image sharpness. The process is then combined into a single convolution operation.
+            </p>
+        </div>
+
+        <div class="project-overview">
+            <h2>Unsharp Masking Theory</h2>
+            <div style="max-width: 1000px; margin: 0 auto; line-height: 1.8;">
+                <p>
+                    Unsharp masking is a classic image enhancement technique that sharpens images by emphasizing
+                    high-frequency
+                    components. The process involves subtracting a blurred (low-pass filtered) version of the image from
+                    the
+                    original to extract high frequencies, then adding these high frequencies back to the original image
+                    with
+                    a scaling factor to enhance sharpness. I implement both a step by step approach and a single
+                    convolution approach.
+                </p>
+
+                <h3>Mathematical Derivation</h3>
+                <div style="background: rgba(255, 255, 255, 0.1); padding: 20px; border-radius: 10px; margin: 20px 0;">
+                    <p><strong>Step 1:</strong> Original image: I(x,y)</p>
+                    <p><strong>Step 2:</strong> Blurred image: I_blur(x,y) = I(x,y) ⊗ G(x,y)</p>
+                    <p><strong>Step 3:</strong> High frequencies: H(x,y) = I(x,y) - I_blur(x,y)</p>
+                    <p><strong>Step 4:</strong> Sharpened image: I_sharp(x,y) = I(x,y) + α × H(x,y)</p>
+                    <p><strong>Step 5:</strong> Combined: I_sharp(x,y) = I(x,y) + α × (I(x,y) - I_blur(x,y))</p>
+                </div>
+
+
+                <h3>Implementation of Unsharp Mask Filter</h3>
+                <p>
+                    The unsharp mask filter combines the entire unsharp masking process into a single convolution
+                    operation.
+                    This is achieved by creating a composite filter that incorporates both the Gaussian blur and the
+                    high-frequency
+                    enhancement in one step.
+                </p>
+
+
+                <h3>Relationship to Blur Filters and High Frequencies</h3>
+                <p>
+                    The unsharp mask filter works by manipulating the frequency content of images:
+                </p>
+
+                <div style="background: rgba(255, 255, 255, 0.1); padding: 20px; border-radius: 10px; margin: 20px 0;">
+                    <p><strong>Gaussian Blur as Low-Pass Filter:</strong></p>
+                    <p>• Gaussian blur removes high-frequency components (edges, details, noise)</p>
+                    <p>• It acts as a low-pass filter, preserving only smooth, gradual changes</p>
+                    <p>• The blurred image contains primarily low-frequency information</p>
+
+                    <p><strong>High-Frequency Extraction:</strong></p>
+                    <p>• High frequencies = Original - Blurred = I - I_blur</p>
+                    <p>• This difference contains edges, textures, and fine details</p>
+                    <p>• High frequencies are what make images appear sharp and detailed</p>
+
+                    <p><strong>Enhancement Process:</strong></p>
+                    <p>• Add amplified high frequencies back to original: I + α × (I - I_blur)</p>
+                    <p>• This strengthens edges and details without affecting smooth regions</p>
+                    <p>• The result appears sharper because high-frequency content is emphasized</p>
+                </div>
+
+                <h3>Key Parameters</h3>
+                <p>
+                    The effectiveness of unsharp masking depends on parameter:
+                    the enhancement factor (α). Higher α values add more high-frequency emphasis, potentially leading to
+                    oversharpening
+                    artifacts.
+                </p>
+            </div>
+        </div>
+
+        <!-- Original Images -->
+        <div class="section-header">
+            <h2>Original Images</h2>
+            <p class="section-description">
+                The original images used for unsharp masking demonstration. These images will be processed to enhance
+                their sharpness using the unsharp masking technique.
+            </p>
+        </div>
+
+        <div class="gallery">
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="media/2.1/photo.jpg" alt="Original Photo" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Original Photo</div>
+                    <div class="image-filename">photo.jpg</div>
+                    <div class="image-description">
+                        Original image used for unsharp masking demonstration.
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="media/2.1/taj.jpg" alt="Original Taj" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Original Taj</div>
+                    <div class="image-filename">taj.jpg</div>
+                    <div class="image-description">
+                        Taj Mahal image used for unsharp masking demonstration.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Blurred Images -->
+        <div class="section-header">
+            <h2>Gaussian Blurred Images</h2>
+            <p class="section-description">
+                Images after applying Gaussian blur (σ=1.5) to extract low-frequency components. These blurred versions
+                will be subtracted from the original images to obtain high-frequency components.
+            </p>
+        </div>
+
+        <div class="gallery">
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="media/2.1/blurred_photo_1.5.jpg" alt="Blurred Photo" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Blurred Photo</div>
+                    <div class="image-filename">blurred_photo_1.5.jpg</div>
+                    <div class="image-description">
+                        Photo after Gaussian blur with σ=1.5 to extract low frequencies.
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="media/2.1/blurred_taj_1.5.jpg" alt="Blurred Taj" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Blurred Taj</div>
+                    <div class="image-filename">blurred_taj_1.5.jpg</div>
+                    <div class="image-description">
+                        Taj Mahal after Gaussian blur with σ=1.5 to extract low frequencies.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- High Frequency Components -->
+        <div class="section-header">
+            <h2>High Frequency Components</h2>
+            <p class="section-description">
+                High-frequency components extracted by subtracting the blurred images from the original images. These
+                components contain the edge and detail information that will be emphasized in the sharpening process.
+            </p>
+        </div>
+
+        <div class="gallery">
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="media/2.1/high_freq_photo.jpg" alt="High Frequency Photo" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">High Frequency Photo</div>
+                    <div class="image-filename">high_freq_photo.jpg</div>
+                    <div class="image-description">
+                        High-frequency components extracted from the photo (original - blurred).
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="media/2.1/high_freq_taj.jpg" alt="High Frequency Taj" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">High Frequency Taj</div>
+                    <div class="image-filename">high_freq_taj.jpg</div>
+                    <div class="image-description">
+                        High-frequency components extracted from the Taj image (original - blurred).
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sharpened Images with Different Alpha Values -->
+        <div class="section-header">
+            <h2>Sharpened Images (Different Enhancement Factors)</h2>
+            <p class="section-description">
+                Results of unsharp masking with different enhancement factors (α). Higher α values add more
+                high-frequency
+                emphasis, potentially leading to oversharpening artifacts, while lower α values provide subtle
+                enhancement.
+            </p>
+        </div>
+
+        <div class="gallery">
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="media/2.1/sharpened_single_photo_1.0.jpg" alt="Sharpened Photo α=1.0"
+                        onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Sharpened Photo (α=1.0)</div>
+                    <div class="image-filename">sharpened_single_photo_1.0.jpg</div>
+                    <div class="image-description">
+                        Photo sharpened with enhancement factor α=1.0.
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="media/2.1/sharpened_single_photo_1.5.jpg" alt="Sharpened Photo α=1.5"
+                        onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Sharpened Photo (α=1.5)</div>
+                    <div class="image-filename">sharpened_single_photo_1.5.jpg</div>
+                    <div class="image-description">
+                        Photo sharpened with enhancement factor α=1.5.
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="media/2.1/sharpened_single_photo_2.0.jpg" alt="Sharpened Photo α=2.0"
+                        onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Sharpened Photo (α=2.0)</div>
+                    <div class="image-filename">sharpened_single_photo_2.0.jpg</div>
+                    <div class="image-description">
+                        Photo sharpened with enhancement factor α=2.0.
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="media/2.1/sharpened_single_photo_5.0.jpg" alt="Sharpened Photo α=5.0"
+                        onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Sharpened Photo (α=5.0)</div>
+                    <div class="image-filename">sharpened_single_photo_5.0.jpg</div>
+                    <div class="image-description">
+                        Photo sharpened with enhancement factor α=5.0 (may show oversharpening artifacts).
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="media/2.1/sharpened_single_taj_1.0.jpg" alt="Sharpened Taj α=1.0"
+                        onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Sharpened Taj (α=1.0)</div>
+                    <div class="image-filename">sharpened_single_taj_1.0.jpg</div>
+                    <div class="image-description">
+                        Taj Mahal sharpened with enhancement factor α=1.0.
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="media/2.1/sharpened_single_taj_1.5.jpg" alt="Sharpened Taj α=1.5"
+                        onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Sharpened Taj (α=1.5)</div>
+                    <div class="image-filename">sharpened_single_taj_1.5.jpg</div>
+                    <div class="image-description">
+                        Taj Mahal sharpened with enhancement factor α=1.5.
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="media/2.1/sharpened_single_taj_2.0.jpg" alt="Sharpened Taj α=2.0"
+                        onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Sharpened Taj (α=2.0)</div>
+                    <div class="image-filename">sharpened_single_taj_2.0.jpg</div>
+                    <div class="image-description">
+                        Taj Mahal sharpened with enhancement factor α=2.0.
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="media/2.1/sharpened_single_taj_5.0.jpg" alt="Sharpened Taj α=5.0"
+                        onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Sharpened Taj (α=5.0)</div>
+                    <div class="image-filename">sharpened_single_taj_5.0.jpg</div>
+                    <div class="image-description">
+                        Taj Mahal sharpened with enhancement factor α=5.0 (may show oversharpening artifacts).
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 2.2: Hybrid Images -->
+        <div class="section-header">
+            <h2>2.2 Hybrid Images</h2>
+            <p class="section-description">
+                This section demonstrates the creation of hybrid images by combining low-frequency components from one
+                image
+                with high-frequency components from another. The result creates images that appear different when viewed
+                from different distances, exploiting human visual perception and frequency analysis.
+            </p>
+        </div>
+
+        <div class="project-overview">
+            <h2>Hybrid Image Theory</h2>
+            <div style="max-width: 1000px; margin: 0 auto; line-height: 1.8;">
+                <p>
+                    Hybrid images are created by combining the low-frequency components of one image with the
+                    high-frequency
+                    components of another image. This technique exploits the fact that human visual perception processes
+                    different frequency bands differently - low frequencies are processed at a distance, while high
+                    frequencies are processed up close. The result is an image that appears to change as viewing
+                    distance changes.
+                </p>
+
+                <h3>Implementation Process</h3>
+                <div style="background: rgba(255, 255, 255, 0.1); padding: 20px; border-radius: 10px; margin: 20px 0;">
+                    <p><strong>Step 1:</strong> Image Alignment - Critical for perceptual grouping</p>
+                    <p><strong>Step 2:</strong> Low-pass filter first image using Gaussian filter</p>
+                    <p><strong>Step 3:</strong> High-pass filter second image (impulse - Gaussian)</p>
+                    <p><strong>Step 4:</strong> Combine filtered images by addition</p>
+                    <p><strong>Step 5:</strong> Frequency analysis to verify the process</p>
+                </div>
+
+
+
+                <h3>Filter Parameters</h3>
+                <div style="background: rgba(255, 255, 255, 0.1); padding: 20px; border-radius: 10px; margin: 20px 0;">
+                    <p><strong>Low-pass Filter:</strong> Gaussian filter with σ = 2</p>
+                    <p>• This cutoff frequency preserves the overall shape and structure</p>
+                    <p>• Removes fine details and high-frequency noise</p>
+                    <p>• Creates smooth, blurred appearance suitable for distance viewing</p>
+
+                    <p><strong>High-pass Filter:</strong> Impulse - Gaussian filter with σ = 10</p>
+                    <p>• This cutoff frequency emphasizes edges and fine details</p>
+                    <p>• Removes low-frequency components and smooth regions</p>
+                    <p>• Creates sharp, detailed appearance suitable for close viewing</p>
+                </div>
+
+                <h3>Key Considerations</h3>
+                <p>
+                    The success of hybrid images depends on several factors: proper image alignment, appropriate cutoff
+                    frequencies for the filters, and the choice of images that have complementary frequency
+                    characteristics.
+                    The cutoff frequency should be chosen through experimentation to achieve the desired perceptual
+                    effect.
+                </p>
+            </div>
+        </div>
+
+        <!-- Sample Images -->
+        <div class="section-header">
+            <h2>Sample Images</h2>
+            <p class="section-description">
+                The original images used for creating hybrid images. Derek and Nutmeg (his former cat) serve as our
+                sample subjects for demonstrating the hybrid image technique.
+            </p>
+        </div>
+
+        <div class="gallery">
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="media/2.2/DerekPicture.jpg" alt="Derek Picture" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Derek Picture</div>
+                    <div class="image-filename">DerekPicture.jpg</div>
+                    <div class="image-description">
+                        First image used for hybrid creation - will provide low-frequency components.
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="media/2.2/nutmeg.jpg" alt="Nutmeg Picture" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Nutmeg Picture</div>
+                    <div class="image-filename">nutmeg.jpg</div>
+                    <div class="image-description">
+                        Second image used for hybrid creation - will provide high-frequency components.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filtered Components -->
+        <div class="section-header">
+            <h2>Filtered Components</h2>
+            <p class="section-description">
+                The low-frequency and high-frequency components extracted from the original images. These components
+                are then combined to create the hybrid image.
+            </p>
+        </div>
+
+        <div class="gallery">
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="media/2.2/low_freq.jpg" alt="Low Frequency Component" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Low Frequency Component</div>
+                    <div class="image-filename">low_freq.jpg</div>
+                    <div class="image-description">
+                        Low-frequency components from Derek's image (Gaussian filtered).
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="media/2.2/high_freq.jpg" alt="High Frequency Component" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">High Frequency Component</div>
+                    <div class="image-filename">high_freq.jpg</div>
+                    <div class="image-description">
+                        High-frequency components from Nutmeg's image (impulse - Gaussian).
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hybrid Results -->
+        <div class="section-header">
+            <h2>Hybrid Image Results</h2>
+            <p class="section-description">
+                Multiple hybrid images created by combining low-frequency and high-frequency components from different
+                image pairs. Each hybrid image demonstrates the distance-dependent perceptual effect.
+            </p>
+        </div>
+
+        <div class="gallery">
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="media/2.2/hybrid.jpg" alt="Derek-Nutmeg Hybrid" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Derek-Nutmeg Hybrid</div>
+                    <div class="image-filename">hybrid.jpg</div>
+                    <div class="image-description">
+                        Hybrid image combining Derek's low frequencies with Nutmeg's high frequencies.
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="media/2.2/hybrid_1.jpg" alt="Additional Hybrid" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Additional Hybrid</div>
+                    <div class="image-filename">hybrid_1.jpg</div>
+                    <div class="image-description">
+                        Another hybrid image demonstrating the technique with different image pairs.
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="media/2.2/hybrid_2.jpg" alt="Hybrid Image 2" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Hybrid Image 2</div>
+                    <div class="image-filename">hybrid_2.jpg</div>
+                    <div class="image-description">
+                        Third hybrid image showcasing the distance-dependent perceptual effect.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Additional Image Pairs -->
+        <div class="section-header">
+            <h2>Additional Image Pairs</h2>
+            <p class="section-description">
+                Additional source images used for creating hybrid images, demonstrating the technique with various
+                subjects including objects and animals.
+            </p>
+        </div>
+
+        <div class="gallery">
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="media/2.2/cola.jpg" alt="Cola" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Cola</div>
+                    <div class="image-filename">cola.jpg</div>
+                    <div class="image-description">
+                        Cola bottle image used as source for hybrid image creation.
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="media/2.2/kiwi.jpg" alt="Kiwi" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Kiwi</div>
+                    <div class="image-filename">kiwi.jpg</div>
+                    <div class="image-description">
+                        Kiwi fruit image used as source for hybrid image creation.
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="media/2.2/mengo.jpg" alt="Mengo" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Mengo</div>
+                    <div class="image-filename">mengo.jpg</div>
+                    <div class="image-description">
+                        Mengo image used as source for hybrid image creation.
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="media/2.2/sprite.jpg" alt="Sprite" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Sprite</div>
+                    <div class="image-filename">sprite.jpg</div>
+                    <div class="image-description">
+                        Sprite bottle image used as source for hybrid image creation.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Frequency Analysis -->
+        <div class="section-header">
+            <h2>Frequency Domain Analysis</h2>
+            <p class="section-description">
+                Log magnitude of the Fourier transform showing the frequency content of the original images,
+                filtered components, and the final hybrid image. This analysis helps verify the hybrid image creation
+                process.
+            </p>
+        </div>
+
+        <div class="gallery">
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="media/2.2/fft_im1.jpg" alt="FFT Image 1" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">FFT of Derek's Image</div>
+                    <div class="image-filename">fft_im1.jpg</div>
+                    <div class="image-description">
+                        Log magnitude of Fourier transform of Derek's original image.
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="media/2.2/fft_im2.jpg" alt="FFT Image 2" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">FFT of Nutmeg's Image</div>
+                    <div class="image-filename">fft_im2.jpg</div>
+                    <div class="image-description">
+                        Log magnitude of Fourier transform of Nutmeg's original image.
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="media/2.2/fft_low_freq.jpg" alt="FFT Low Frequency" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">FFT of Low Frequency</div>
+                    <div class="image-filename">fft_low_freq.jpg</div>
+                    <div class="image-description">
+                        Log magnitude of Fourier transform of the low-frequency component.
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="media/2.2/fft_high_freq.jpg" alt="FFT High Frequency" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">FFT of High Frequency</div>
+                    <div class="image-filename">fft_high_freq.jpg</div>
+                    <div class="image-description">
+                        Log magnitude of Fourier transform of the high-frequency component.
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="media/2.2/fft_hybrid.jpg" alt="FFT Hybrid" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">FFT of Hybrid Image</div>
+                    <div class="image-filename">fft_hybrid.jpg</div>
+                    <div class="image-description">
+                        Log magnitude of Fourier transform of the final hybrid image.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 2.3: Gaussian and Laplacian Stacks -->
+        <div class="section-header">
+            <h2>2.3/2.4 Gaussian and Laplacian Stacks</h2>
+            <p class="section-description">
+                This section demonstrates the creation of Gaussian and Laplacian stacks for multi-scale image analysis.
+                We visualize the process using Orange and Apple images, showing how different frequency bands capture
+                different levels of detail in the images.
+            </p>
+        </div>
+
+        <div class="project-overview">
+            <h2>Multi-Scale Image Analysis</h2>
+            <div style="max-width: 1000px; margin: 0 auto; line-height: 1.8;">
+                <p>
+                    Gaussian and Laplacian stacks are fundamental tools in multi-scale image analysis. The Gaussian
+                    stack
+                    represents the image at different scales (blur levels), while the Laplacian stack captures the
+                    differences
+                    between consecutive scales, highlighting details at specific frequency bands. This decomposition is
+                    crucial
+                    for advanced image processing techniques like blending and texture analysis.
+                </p>
+
+                <h3>Implementation Process</h3>
+                <div style="background: rgba(255, 255, 255, 0.1); padding: 20px; border-radius: 10px; margin: 20px 0;">
+                    <p><strong>Gaussian Stack:</strong> Successive Gaussian blurring at increasing σ values</p>
+                    <p><strong>Laplacian Stack:</strong> Differences between consecutive Gaussian levels</p>
+                    <p><strong>Reconstruction:</strong> Sum of Laplacian levels equals original image</p>
+                    <p><strong>Multi-scale Analysis:</strong> Each level captures different frequency content</p>
+                </div>
+
+
+                <!-- Original Images -->
+                <div class="section-header">
+                    <h2>Original Images</h2>
+                    <p class="section-description">
+                        The original Orange and Apple images used for creating Gaussian and Laplacian stacks.
+                        These images will be decomposed into multiple frequency bands.
+                    </p>
+                </div>
+
+                <div class="gallery">
+                    <div class="image-card">
+                        <div class="image-container">
+                            <img src="media/2.3-2.4/orange.jpeg" alt="Orange" onclick="openModal(this.src)">
+                        </div>
+                        <div class="image-info">
+                            <div class="image-title">Orange</div>
+                            <div class="image-filename">orange.jpeg</div>
+                            <div class="image-description">
+                                Original orange image used for multi-scale analysis.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="image-card">
+                        <div class="image-container">
+                            <img src="media/2.3-2.4/apple.jpeg" alt="Apple" onclick="openModal(this.src)">
+                        </div>
+                        <div class="image-info">
+                            <div class="image-title">Apple</div>
+                            <div class="image-filename">apple.jpeg</div>
+                            <div class="image-description">
+                                Original apple image used for multi-scale analysis.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="project-overview">
+                    <h2>Multi-Scale Blending Theory</h2>
+                    <div style="max-width: 1000px; margin: 0 auto; line-height: 1.8;">
+                        <p>
+                            Multi-scale blending combines images at different frequency levels using Laplacian stacks
+                            and
+                            Gaussian-weighted masks. This technique produces seamless blends by preserving details at
+                            each
+                            scale level, avoiding the artifacts that occur with simple blending methods.
+                        </p>
+
+                        <h3>Blending Process</h3>
+                        <div
+                            style="background: rgba(255, 255, 255, 0.1); padding: 20px; border-radius: 10px; margin: 20px 0;">
+                            <p><strong>Step 1:</strong> Create Gaussian stacks for both images</p>
+                            <p><strong>Step 2:</strong> Create Laplacian stacks for both images</p>
+                            <p><strong>Step 3:</strong> Create Gaussian-blurred mask</p>
+                            <p><strong>Step 4:</strong> Blend Laplacian levels using weighted masks</p>
+                            <p><strong>Step 5:</strong> Reconstruct final blended image</p>
+                        </div>
+
+
+                    </div>
+                </div>
+
+                <!-- Figure 3.42 Recreation -->
+                <div class="section-header">
+                    <h2>Figure 3.42 Recreation</h2>
+                    <p class="section-description">
+                        Recreation of Figure 3.42 outcomes (a) through (l) demonstrating the multi-scale blending
+                        process
+                        with different mask configurations and blending scenarios.
+                    </p>
+                </div>
+
+                <div class="gallery">
+                    <div class="image-card">
+                        <div class="image-container">
+                            <img src="media/2.3-2.4/oraple_vertical.jpg" alt="Orange-Apple Vertical Blend (JPG)"
+                                onclick="openModal(this.src)">
+                        </div>
+                        <div class="image-info">
+                            <div class="image-title">Orange-Apple Vertical Blend (JPG)</div>
+                            <div class="image-filename">oraple_vertical.jpg</div>
+                            <div class="image-description">
+                                Multi-scale blended image of orange and apple with vertical mask (JPG format).
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="image-card">
+                        <div class="image-container">
+                            <img src="media/2.3-2.4/oraple_vertical.png" alt="Orange-Apple Vertical Blend (PNG)"
+                                onclick="openModal(this.src)">
+                        </div>
+                        <div class="image-info">
+                            <div class="image-title">Orange-Apple Vertical Blend (PNG)</div>
+                            <div class="image-filename">oraple_vertical.png</div>
+                            <div class="image-description">
+                                Multi-scale blended image of orange and apple with vertical mask (PNG format).
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Custom Blending Examples -->
+                <div class="section-header">
+                    <h2>Custom Blending Examples</h2>
+                    <p class="section-description">
+                        Two sets of custom multi-scale blending examples, each demonstrating the complete process
+                        from source images to final blended results using different mask configurations.
+                    </p>
+                </div>
+
+                <!-- Example 1: Mango-Yimi Blend -->
+                <div class="section-header">
+                    <h3>Example 1: Mango-Yimi Blend</h3>
+                    <p class="section-description">
+                        Source images and resulting blend using irregular circular mask configuration.
+                    </p>
+                </div>
+
+                <div class="gallery">
+                    <div class="image-card">
+                        <div class="image-container">
+                            <img src="media/2.3-2.4/mango1.jpg" alt="Mango Source" onclick="openModal(this.src)">
+                        </div>
+                        <div class="image-info">
+                            <div class="image-title">Mango Source</div>
+                            <div class="image-filename">mango1.jpg</div>
+                            <div class="image-description">
+                                First source image for mango-yimi blending experiment.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="image-card">
+                        <div class="image-container">
+                            <img src="media/2.3-2.4/yimi1.jpg" alt="Yimi Source" onclick="openModal(this.src)">
+                        </div>
+                        <div class="image-info">
+                            <div class="image-title">Yimi Source</div>
+                            <div class="image-filename">yimi1.jpg</div>
+                            <div class="image-description">
+                                Second source image for mango-yimi blending experiment.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="image-card">
+                        <div class="image-container">
+                            <img src="media/2.3-2.4/irregular_blend_circle.jpg" alt="Irregular Circle Blend"
+                                onclick="openModal(this.src)">
+                        </div>
+                        <div class="image-info">
+                            <div class="image-title">Irregular Circle Blend</div>
+                            <div class="image-filename">irregular_blend_circle.jpg</div>
+                            <div class="image-description">
+                                Multi-scale blended result using irregular circular mask.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Example 2: White-Black Blend -->
+                <div class="section-header">
+                    <h3>Example 2: White-Black Blend</h3>
+                    <p class="section-description">
+                        Source images and resulting blend using vertical mask configuration.
+                    </p>
+                </div>
+
+                <div class="gallery">
+                    <div class="image-card">
+                        <div class="image-container">
+                            <img src="media/2.3-2.4/white.jpg" alt="White Source" onclick="openModal(this.src)">
+                        </div>
+                        <div class="image-info">
+                            <div class="image-title">White Source</div>
+                            <div class="image-filename">white.jpg</div>
+                            <div class="image-description">
+                                First source image for white-black blending experiment.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="image-card">
+                        <div class="image-container">
+                            <img src="media/2.3-2.4/black3.jpg" alt="Black Source" onclick="openModal(this.src)">
+                        </div>
+                        <div class="image-info">
+                            <div class="image-title">Black Source</div>
+                            <div class="image-filename">black3.jpg</div>
+                            <div class="image-description">
+                                Second source image for white-black blending experiment.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="image-card">
+                        <div class="image-container">
+                            <img src="media/2.3-2.4/black_white_vertical.jpg" alt="Black-White Vertical Blend"
+                                onclick="openModal(this.src)">
+                        </div>
+                        <div class="image-info">
+                            <div class="image-title">Black-White Vertical Blend</div>
+                            <div class="image-filename">black_white_vertical.jpg</div>
+                            <div class="image-description">
+                                Multi-scale blended result using vertical mask configuration.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="text-align: center; margin: 40px 0;">
+                    <a href="../index.html"
+                        style="display: inline-flex; align-items: center; padding: 15px 30px; background: linear-gradient(45deg, #667eea, #764ba2); color: white; text-decoration: none; border-radius: 25px; font-size: 16px; font-weight: 500; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);">
+                        ← Back to Home
+                    </a>
+                </div>
+
+                <footer>
+                    <p>&copy; 2025 CS180 Project 2 - Fun with Filters and Frequencies</p>
+                    <p>Digital Image Processing and Analysis</p>
+                </footer>
+            </div>
+
+            <!-- Modal for full-size images -->
+            <div id="imageModal" class="modal">
+                <span class="close" onclick="closeModal()">&times;</span>
+                <img class="modal-content" id="modalImage">
+            </div>
+
+            <script>
+                function openModal(src) {
+                    document.getElementById('imageModal').style.display = 'block';
+                    document.getElementById('modalImage').src = src;
+                }
+
+                function closeModal() {
+                    document.getElementById('imageModal').style.display = 'none';
+                }
+
+                // Close modal when clicking outside the image
+                window.onclick = function (event) {
+                    const modal = document.getElementById('imageModal');
+                    if (event.target == modal) {
+                        modal.style.display = 'none';
+                    }
+                }
+
+                // Close modal with Escape key
+                document.addEventListener('keydown', function (event) {
+                    if (event.key === 'Escape') {
+                        closeModal();
+                    }
+                });
+
+                // Add smooth scrolling
+                document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                    anchor.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        document.querySelector(this.getAttribute('href')).scrollIntoView({
+                            behavior: 'smooth'
+                        });
+                    });
+                });
+            </script>
+</body>
+
+</html>
