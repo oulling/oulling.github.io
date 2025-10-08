@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CS180 Project 3: Image Mosaics</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-link {
+            margin-bottom: 30px;
+        }
+
+        .back-link a {
+            display: inline-flex;
+            align-items: center;
+            padding: 10px 20px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .back-link a:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+            background: linear-gradient(45deg, #764ba2, #667eea);
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+            padding: 40px 0;
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 20px;
+        }
+
+        .description {
+            max-width: 800px;
+            margin: 0 auto;
+            font-size: 1rem;
+            opacity: 0.8;
+            line-height: 1.8;
+        }
+
+        .section-header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 40px 0 30px 0;
+            color: white;
+            text-align: center;
+        }
+
+        .section-header h2 {
+            color: white;
+            margin-bottom: 15px;
+            font-size: 1.8rem;
+        }
+
+        .section-description {
+            font-size: 1rem;
+            opacity: 0.9;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+            align-items: start;
+        }
+
+        .image-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .image-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .image-container {
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #f8f9fa;
+            min-height: 200px;
+        }
+
+        .image-container img {
+            width: 100%;
+            height: auto;
+            max-height: 400px;
+            object-fit: contain;
+            transition: transform 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        .image-card:hover .image-container img {
+            transform: scale(1.05);
+        }
+
+        .image-info {
+            padding: 20px;
+        }
+
+        .image-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 8px;
+            text-transform: capitalize;
+        }
+
+        .image-filename {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+            font-family: 'Courier New', monospace;
+            background: #f8f9fa;
+            padding: 5px 10px;
+            border-radius: 5px;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+
+        .image-description {
+            font-size: 0.9rem;
+            color: #666;
+            line-height: 1.5;
+        }
+
+        footer {
+            text-align: center;
+            color: white;
+            margin-top: 60px;
+            padding: 40px 0;
+            opacity: 0.7;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+        }
+
+        .modal-content {
+            margin: auto;
+            display: block;
+            max-width: 90%;
+            max-height: 90%;
+            margin-top: 2%;
+        }
+
+        .close {
+            position: absolute;
+            top: 15px;
+            right: 35px;
+            color: #f1f1f1;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: #bbb;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            .gallery {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .container {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="back-link">
+            <a href="../index.html">← Back to Home</a>
+        </div>
+
+        <header>
+            <h1>Image Mosaics</h1>
+            <p class="subtitle">CS180 Project 3: Panoramic Image Stitching</p>
+            <p class="description">
+                This project explores the creation of panoramic image mosaics through projective transformations.
+                We capture multiple photographs with overlapping fields of view and stitch them together to create
+                seamless panoramic images using computer vision techniques.
+            </p>
+        </header>
+
+        <!-- Section A.1: Shoot the Pictures -->
+        <div class="section-header">
+            <h2>A.1 Shoot the Pictures</h2>
+            <p class="section-description">
+                Two or more photographs with projective transformations between them. Images captured with fixed
+                center of projection and camera rotation, featuring 40-70% overlap for optimal registration.
+            </p>
+        </div>
+
+        <div class="gallery">
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="A.1/google_1.jpg" alt="Google Building 1" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Google Building 1</div>
+                    <div class="image-filename">google_1.jpg</div>
+                    <div class="image-description">
+                        First image of Google building facade for mosaic creation.
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="A.1/google_2.jpg" alt="Google Building 2" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Google Building 2</div>
+                    <div class="image-filename">google_2.jpg</div>
+                    <div class="image-description">
+                        Second image of Google building facade with overlapping field of view.
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="A.1/street_1.jpg" alt="Street Scene 1" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Street Scene 1</div>
+                    <div class="image-filename">street_1.jpg</div>
+                    <div class="image-description">
+                        First image of street scene for panoramic mosaic.
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="A.1/street_2.jpg" alt="Street Scene 2" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Street Scene 2</div>
+                    <div class="image-filename">street_2.jpg</div>
+                    <div class="image-description">
+                        Second image of street scene with significant overlap.
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="A.1/train_1.jpg" alt="Train Station 1" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Train Station 1</div>
+                    <div class="image-filename">train_1.jpg</div>
+                    <div class="image-description">
+                        First image of train station interior for mosaic.
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="A.1/train_2.jpg" alt="Train Station 2" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Train Station 2</div>
+                    <div class="image-filename">train_2.jpg</div>
+                    <div class="image-description">
+                        Second image of train station interior with overlapping view.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section A.2: Homography Matrix Computation -->
+        <div class="section-header">
+            <h2>A.2 Homography Matrix Computation</h2>
+            <p class="section-description">
+                Computation of homography matrix H using least squares method to establish
+                projective transformation between corresponding point pairs in two images.
+            </p>
+        </div>
+
+
+        <h3 style="color: white; margin: 30px 0 20px 0; font-size: 1.5rem;">Mathematical Formulation</h3>
+
+        <div style="background: rgba(255, 255, 255, 0.1); padding: 25px; border-radius: 10px; margin: 20px 0;">
+            <h4 style="color: white; margin-bottom: 15px;">Homography Transformation</h4>
+            <p style="margin-bottom: 15px;">
+                A homography matrix H relates corresponding points between two images through the projective
+                transformation:
+            </p>
+            <div style="text-align: center; font-size: 1.2rem; margin: 20px 0;">
+                <strong>H · [x, y, 1]ᵀ = [u, v, 1]ᵀ</strong>
+            </div>
+            <p style="margin-bottom: 15px;">
+                Where (x, y) are coordinates in the first image and (u, v) are corresponding coordinates in the
+                second image.
+            </p>
+        </div>
+
+        <div style="background: rgba(255, 255, 255, 0.1); padding: 25px; border-radius: 10px; margin: 20px 0;">
+            <h4 style="color: white; margin-bottom: 15px;">Least Squares Solution</h4>
+            <p style="margin-bottom: 15px;">
+                Given n corresponding point pairs, we construct a system of linear equations:
+            </p>
+            <div style="text-align: center; font-size: 1.1rem; margin: 20px 0;">
+                <strong>A · h = b</strong>
+            </div>
+            <p style="margin-bottom: 15px;">
+                Where A is a 2n × 8 matrix, h is the 8-element vector of homography parameters, and b contains the
+                target coordinates.
+            </p>
+            <p style="margin-bottom: 15px;">
+                For each point pair (xᵢ, yᵢ) ↔ (uᵢ, vᵢ), we add two equations to the system:
+            </p>
+            <div
+                style="font-size: 0.9rem; margin: 15px 0; padding: 15px; background: rgba(0, 0, 0, 0.2); border-radius: 5px;">
+                <strong>Row 1:</strong> [xᵢ, yᵢ, 1, 0, 0, 0, -uᵢ·xᵢ, -uᵢ·yᵢ] · h = uᵢ<br>
+                <strong>Row 2:</strong> [0, 0, 0, xᵢ, yᵢ, 1, -vᵢ·xᵢ, -vᵢ·yᵢ] · h = vᵢ
+            </div>
+        </div>
+
+        <div style="background: rgba(255, 255, 255, 0.1); padding: 25px; border-radius: 10px; margin: 20px 0;">
+            <h4 style="color: white; margin-bottom: 15px;">Matrix Reconstruction</h4>
+            <p style="margin-bottom: 15px;">
+                The solution vector h = [h₀, h₁, h₂, h₃, h₄, h₅, h₆, h₇]ᵀ is used to reconstruct the 3×3 homography
+                matrix:
+            </p>
+            <div style="text-align: center; font-size: 1.1rem; margin: 20px 0;">
+                <strong>H = [[h₀, h₁, h₂], [h₃, h₄, h₅], [h₆, h₇, 1]]</strong>
+            </div>
+            <p style="margin-bottom: 15px;">
+                The last element h₈ is normalized to 1.0, ensuring the homography matrix represents a proper
+                projective transformation.
+            </p>
+        </div>
+
+    </div>
+
+    <!-- A.2 Image Results -->
+    <div class="section-header">
+        <h2>A.2 Corresponding Points and Homography Results</h2>
+        <p class="section-description">
+            Visualization of corresponding point pairs used for homography computation.
+            Three image pairs with manually selected corresponding points and their computed homography matrices.
+        </p>
+    </div>
+
+    <!-- Train Station Image Pair -->
+    <div class="section-header" style="margin: 30px 0 20px 0;">
+        <h3 style="color: white; margin-bottom: 15px; font-size: 1.4rem;">Train Station Image Pair</h3>
+    </div>
+
+    <div class="gallery">
+        <div class="image-card">
+            <div class="image-container">
+                <img src="A.2/train_img1.jpg" alt="Train Station Image 1" onclick="openModal(this.src)">
+            </div>
+            <div class="image-info">
+                <div class="image-title">Train Station Image 1</div>
+                <div class="image-filename">correspondence_img1.jpg</div>
+                <div class="image-description">
+                    First train station image with manually selected corresponding points.
+                </div>
+            </div>
+        </div>
+
+        <div class="image-card">
+            <div class="image-container">
+                <img src="A.2/train_img2.jpg" alt="Train Station Image 2" onclick="openModal(this.src)">
+            </div>
+            <div class="image-info">
+                <div class="image-title">Train Station Image 2</div>
+                <div class="image-filename">correspondence_img2.jpg</div>
+                <div class="image-description">
+                    Second train station image with corresponding points matched to the first image.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div
+        style="background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border-radius: 15px; padding: 25px; margin: 20px 0; color: white; text-align: center;">
+        <h4 style="color: white; margin-bottom: 15px;">Computed Homography Matrix H₁</h4>
+        <div
+            style="font-family: 'Courier New', monospace; font-size: 1rem; line-height: 1.6; background: rgba(0, 0, 0, 0.3); padding: 15px; border-radius: 8px;">
+            H₁ = [1.817286e+00, -5.263971e-02, -3.140033e+03]<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[3.197564e-01, &nbsp;1.586312e+00, -1.021723e+03]<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[1.921549e-04, &nbsp;8.950869e-06, &nbsp;1.000000e+00]
+        </div>
+    </div>
+
+    <!-- Street Scene Image Pair -->
+    <div class="section-header" style="margin: 30px 0 20px 0;">
+        <h3 style="color: white; margin-bottom: 15px; font-size: 1.4rem;">Street Scene Image Pair</h3>
+    </div>
+
+    <div class="gallery">
+        <div class="image-card">
+            <div class="image-container">
+                <img src="A.2/street_img1.jpg" alt="Street Scene Image 1" onclick="openModal(this.src)">
+            </div>
+            <div class="image-info">
+                <div class="image-title">Street Scene Image 1</div>
+                <div class="image-filename">street_1.jpg</div>
+                <div class="image-description">
+                    First street scene image with manually selected corresponding points.
+                </div>
+            </div>
+        </div>
+
+        <div class="image-card">
+            <div class="image-container">
+                <img src="A.2/street_img2.jpg" alt="Street Scene Image 2" onclick="openModal(this.src)">
+            </div>
+            <div class="image-info">
+                <div class="image-title">Street Scene Image 2</div>
+                <div class="image-filename">street_2.jpg</div>
+                <div class="image-description">
+                    Second street scene image with corresponding points matched to the first image.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div
+        style="background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border-radius: 15px; padding: 25px; margin: 20px 0; color: white; text-align: center;">
+        <h4 style="color: white; margin-bottom: 15px;">Computed Homography Matrix H₂</h4>
+        <div
+            style="font-family: 'Courier New', monospace; font-size: 1rem; line-height: 1.6; background: rgba(0, 0, 0, 0.3); padding: 15px; border-radius: 8px;">
+            H₂ = [1.287776e+00, -3.305940e-02, -1.256262e+03]<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[1.218587e-01, &nbsp;1.171943e+00, -2.899204e+02]<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[6.731942e-05, &nbsp;6.854465e-07, &nbsp;1.000000e+00]
+        </div>
+    </div>
+
+    <!-- Google Building Image Pair -->
+    <div class="section-header" style="margin: 30px 0 20px 0;">
+        <h3 style="color: white; margin-bottom: 15px; font-size: 1.4rem;">Google Building Image Pair</h3>
+    </div>
+
+    <div class="gallery">
+        <div class="image-card">
+            <div class="image-container">
+                <img src="A.2/google_img1.jpg" alt="Google Building Image 1" onclick="openModal(this.src)">
+            </div>
+            <div class="image-info">
+                <div class="image-title">Google Building Image 1</div>
+                <div class="image-filename">google_1.jpg</div>
+                <div class="image-description">
+                    First Google building image with manually selected corresponding points.
+                </div>
+            </div>
+        </div>
+
+        <div class="image-card">
+            <div class="image-container">
+                <img src="A.2/google_img2.jpg" alt="Google Building Image 2" onclick="openModal(this.src)">
+            </div>
+            <div class="image-info">
+                <div class="image-title">Google Building Image 2</div>
+                <div class="image-filename">google_2.jpg</div>
+                <div class="image-description">
+                    Second Google building image with corresponding points matched to the first image.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div
+        style="background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border-radius: 15px; padding: 25px; margin: 20px 0; color: white; text-align: center;">
+        <h4 style="color: white; margin-bottom: 15px;">Computed Homography Matrix H₃</h4>
+        <div
+            style="font-family: 'Courier New', monospace; font-size: 1rem; line-height: 1.6; background: rgba(0, 0, 0, 0.3); padding: 15px; border-radius: 8px;">
+            H₃ = [2.252193e+00, -2.291997e-01, -3.748409e+03]<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[6.293565e-01, &nbsp;1.793999e+00, -1.517040e+03]<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[3.246852e-04, -4.015000e-05, &nbsp;1.000000e+00]
+        </div>
+    </div>
+
+    <!-- Section A.3: Image Rectification -->
+    <div class="section-header">
+        <h2>A.3 Image Rectification</h2>
+        <p class="section-description">
+            Implementation of warpImageNearestNeighbor and warpImageBilinear using inverse warping.
+            Applied to multiple images for rectification with performance comparison between interpolation methods.
+        </p>
+    </div>
+
+    <div class="gallery">
+        <div class="image-card">
+            <div class="image-container">
+                <img src="A.3/rectification_input_1.jpg" alt="Input Image 1" onclick="openModal(this.src)">
+            </div>
+            <div class="image-info">
+                <div class="image-title">Input Image 1</div>
+                <div class="image-filename">rectification_input_1.jpg</div>
+                <div class="image-description">
+                    Original input image for rectification processing.
+                </div>
+            </div>
+        </div>
+
+        <div class="image-card">
+            <div class="image-container">
+                <img src="A.3/rectification_nearest_neighbor_1.jpg" alt="Nearest Neighbor 1"
+                    onclick="openModal(this.src)">
+            </div>
+            <div class="image-info">
+                <div class="image-title">Nearest Neighbor Interpolation 1</div>
+                <div class="image-filename">rectification_nearest_neighbor_1.jpg</div>
+                <div class="image-description">
+                    Rectified image using nearest neighbor interpolation. Processing time: 11.10 seconds.
+                </div>
+            </div>
+        </div>
+
+        <div class="image-card">
+            <div class="image-container">
+                <img src="A.3/rectification_bilinear_1.jpg" alt="Bilinear Interpolation 1"
+                    onclick="openModal(this.src)">
+            </div>
+            <div class="image-info">
+                <div class="image-title">Bilinear Interpolation 1</div>
+                <div class="image-filename">rectification_bilinear_1.jpg</div>
+                <div class="image-description">
+                    Rectified image using bilinear interpolation. Processing time: 27.47 seconds.
+                </div>
+            </div>
+        </div>
+
+        <div class="image-card">
+            <div class="image-container">
+                <img src="A.3/rectification_mask_1.jpg" alt="Rectification Mask 1" onclick="openModal(this.src)">
+            </div>
+            <div class="image-info">
+                <div class="image-title">Rectification Mask 1</div>
+                <div class="image-filename">rectification_mask_1.jpg</div>
+                <div class="image-description">
+                    Mask showing the rectification transformation area.
+                </div>
+            </div>
+        </div>
+
+        <div class="image-card">
+            <div class="image-container">
+                <img src="A.3/rectification_input_2.jpg" alt="Input Image 2" onclick="openModal(this.src)">
+            </div>
+            <div class="image-info">
+                <div class="image-title">Input Image 2</div>
+                <div class="image-filename">rectification_input_2.jpg</div>
+                <div class="image-description">
+                    Second original input image for rectification processing.
+                </div>
+            </div>
+        </div>
+
+        <div class="image-card">
+            <div class="image-container">
+                <img src="A.3/rectification_nearest_neighbor_2.jpg" alt="Nearest Neighbor 2"
+                    onclick="openModal(this.src)">
+            </div>
+            <div class="image-info">
+                <div class="image-title">Nearest Neighbor Interpolation 2</div>
+                <div class="image-filename">rectification_nearest_neighbor_2.jpg</div>
+                <div class="image-description">
+                    Rectified image using nearest neighbor interpolation. Processing time: 12.50 seconds.
+                </div>
+            </div>
+        </div>
+
+        <div class="image-card">
+            <div class="image-container">
+                <img src="A.3/rectification_bilinear_2.jpg" alt="Bilinear Interpolation 2"
+                    onclick="openModal(this.src)">
+            </div>
+            <div class="image-info">
+                <div class="image-title">Bilinear Interpolation 2</div>
+                <div class="image-filename">rectification_bilinear_2.jpg</div>
+                <div class="image-description">
+                    Rectified image using bilinear interpolation. Processing time: 27.71 seconds.
+                </div>
+            </div>
+        </div>
+
+        <div class="image-card">
+            <div class="image-container">
+                <img src="A.3/rectification_mask_2.jpg" alt="Rectification Mask 2" onclick="openModal(this.src)">
+            </div>
+            <div class="image-info">
+                <div class="image-title">Rectification Mask 2</div>
+                <div class="image-filename">rectification_mask_2.jpg</div>
+                <div class="image-description">
+                    Mask showing the rectification transformation area for second image.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Performance Comparison -->
+    <div class="section-header">
+        <h2>Performance Comparison</h2>
+        <p class="section-description">
+            Processing time comparison between nearest neighbor and bilinear interpolation methods
+            for image rectification using inverse warping.
+        </p>
+    </div>
+
+    <div
+        style="background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border-radius: 15px; padding: 30px; margin: 30px 0; color: white; text-align: center;">
+        <h3 style="color: white; margin-bottom: 20px; font-size: 1.5rem;">Processing Time Results</h3>
+        <div
+            style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-top: 20px;">
+            <div style="background: rgba(255, 255, 255, 0.1); padding: 20px; border-radius: 10px;">
+                <h4 style="color: white; margin-bottom: 10px;">Image 1</h4>
+                <p><strong>Nearest Neighbor:</strong> 11.10 seconds</p>
+                <p><strong>Bilinear:</strong> 27.47 seconds</p>
+                <p><strong>Speedup:</strong> 2.47x faster</p>
+            </div>
+            <div style="background: rgba(255, 255, 255, 0.1); padding: 20px; border-radius: 10px;">
+                <h4 style="color: white; margin-bottom: 10px;">Image 2</h4>
+                <p><strong>Nearest Neighbor:</strong> 12.50 seconds</p>
+                <p><strong>Bilinear:</strong> 27.71 seconds</p>
+                <p><strong>Speedup:</strong> 2.22x faster</p>
+            </div>
+        </div>
+        <p style="margin-top: 20px; font-size: 0.9rem; opacity: 0.8;">
+            Bilinear interpolation generally produces superior results, but nearest neighbor interpolation
+            is sufficient for most cases as the visual difference is barely noticeable to the human eye.
+            Nearest neighbor interpolation is significantly faster but may produce pixelated results.
+            Bilinear interpolation provides smoother results at the cost of computational time.
+        </p>
+    </div>
+
+    <!-- Section A.4: Image Mosaicing -->
+    <div class="section-header">
+        <h2>A.4 Image Mosaicing</h2>
+        <p class="section-description">
+            Implementation of panoramic image stitching using homography transformations and feathering blending.
+            This section demonstrates the complete pipeline from individual images to seamless panoramic mosaics.
+        </p>
+    </div>
+
+    <div
+        style="background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border-radius: 15px; padding: 40px; margin: 40px 0; color: white;">
+        <h2 style="color: white; margin-bottom: 30px; font-size: 2rem; text-align: center;">Image Mosaicing Pipeline
+        </h2>
+        <div style="max-width: 1000px; margin: 0 auto; line-height: 1.8;">
+
+            <h3 style="color: white; margin: 30px 0 20px 0; font-size: 1.5rem;">Mosaic Creation Process</h3>
+            <p style="margin-bottom: 20px; font-size: 1rem;">
+                The image mosaicing process involves several key steps to transform multiple overlapping images
+                into a single, seamless panoramic view. The pipeline begins with establishing correspondences
+                between image pairs and computing homography matrices that describe the projective transformations
+                between them.
+            </p>
+
+            <h3 style="color: white; margin: 30px 0 20px 0; font-size: 1.5rem;">Coordinate System Alignment</h3>
+            <p style="margin-bottom: 20px; font-size: 1rem;">
+                <strong>Reference Image Selection:</strong> One image is designated as the reference frame,
+                typically the center image of the sequence. All other images are transformed to align with
+                this reference coordinate system using their computed homography matrices.
+            </p>
+
+            <p style="margin-bottom: 20px; font-size: 1rem;">
+                <strong>Output Bounds Calculation:</strong> For each image, the system calculates the
+                transformed bounding box coordinates after applying the homography transformation. This
+                determines the spatial extent of each warped image in the mosaic coordinate system.
+            </p>
+
+            <h3 style="color: white; margin: 30px 0 20px 0; font-size: 1.5rem;">Mosaic Canvas Construction</h3>
+            <p style="margin-bottom: 20px; font-size: 1rem;">
+                <strong>Global Bounds Determination:</strong> The system finds the minimum and maximum
+                coordinates across all transformed images to establish the overall mosaic dimensions.
+                This creates a canvas large enough to contain all warped images.
+            </p>
+
+            <p style="margin-bottom: 20px; font-size: 1rem;">
+                <strong>Translation Offset:</strong> A translation offset is computed to ensure all
+                image coordinates are positive, shifting the mosaic coordinate system to avoid negative
+                pixel positions. This offset is applied to all homography matrices.
+            </p>
+
+            <h3 style="color: white; margin: 30px 0 20px 0; font-size: 1.5rem;">Image Warping and Masking</h3>
+            <p style="margin-bottom: 20px; font-size: 1rem;">
+                <strong>Bilinear Interpolation Warping:</strong> Each input image is warped to the
+                mosaic coordinate system using bilinear interpolation. This ensures smooth transitions
+                and maintains image quality during the transformation process.
+            </p>
+
+            <p style="margin-bottom: 20px; font-size: 1rem;">
+                <strong>Binary Mask Generation:</strong> For each warped image, a binary mask is
+                created indicating valid (non-zero) pixel regions. This mask is essential for
+                determining which pixels contribute to the final mosaic and for handling overlapping regions.
+            </p>
+
+            <h3 style="color: white; margin: 30px 0 20px 0; font-size: 1.5rem;">Feathering Blending Algorithm</h3>
+            <p style="margin-bottom: 20px; font-size: 1rem;">
+                <strong>Alpha Weight Generation:</strong> A sophisticated feathering technique is
+                employed to create smooth transitions between overlapping images. For each image,
+                an alpha weight map is generated that assigns higher weights to pixels near the
+                image center and lower weights to pixels near the edges.
+            </p>
+
+            <p style="margin-bottom: 20px; font-size: 1rem;">
+                <strong>Distance-Based Weighting:</strong> The alpha weight for each pixel is
+                calculated based on its distance to the nearest image edge. Pixels closer to the
+                center receive maximum weight (1.0), while pixels near edges receive proportionally
+                lower weights, creating a smooth falloff effect.
+            </p>
+
+            <h3 style="color: white; margin: 30px 0 20px 0; font-size: 1.5rem;">Weighted Blending Process</h3>
+            <p style="margin-bottom: 20px; font-size: 1rem;">
+                <strong>Multi-Image Fusion:</strong> The final mosaic is created by blending all
+                warped images using their respective alpha weights. Each pixel in the mosaic is
+                computed as a weighted average of all contributing pixels from overlapping images.
+            </p>
+
+            <p style="margin-bottom: 20px; font-size: 1rem;">
+                <strong>Normalization and Quality Control:</strong> The blending process includes
+                normalization to ensure pixel values remain within valid ranges. Special handling
+                prevents division by zero in regions where no images contribute, maintaining
+                computational stability throughout the process.
+            </p>
+        </div>
+    </div>
+
+    <!-- A.4 Results -->
+    <div class="section-header">
+        <h2>A.4 Mosaic Results</h2>
+        <p class="section-description">
+            Panoramic mosaics created from three different image pairs using homography transformation and feathering
+            blending.
+            The results demonstrate seamless integration of overlapping images into single panoramic views across
+            various scene types.
+        </p>
+    </div>
+
+    </div>
+
+    <!-- Train Station Mosaic Results -->
+    <div class="section-header" style="margin: 30px 0 20px 0;">
+        <h3 style="color: white; margin-bottom: 15px; font-size: 1.4rem;">Train Station Panoramic Mosaic</h3>
+    </div>
+
+    <div class="gallery">
+        <div class="image-card">
+            <div class="image-container">
+                <img src="A.4/mosaic_train.jpg" alt="Train Station Mosaic" onclick="openModal(this.src)">
+            </div>
+            <div class="image-info">
+                <div class="image-title">Train Station Panoramic Mosaic</div>
+                <div class="image-filename">mosaic_train.jpg</div>
+                <div class="image-description">
+                    Seamless panoramic mosaic created from train station image pair using homography transformation and
+                    feathering blending technique.
+                </div>
+            </div>
+        </div>
+
+        <div class="image-card">
+            <div class="image-container">
+                <img src="A.4/mosaic_mask_train.jpg" alt="Train Station Mosaic Mask" onclick="openModal(this.src)">
+            </div>
+            <div class="image-info">
+                <div class="image-title">Train Station Mosaic Blending Mask</div>
+                <div class="image-filename">mosaic_mask_train.jpg</div>
+                <div class="image-description">
+                    Binary mask showing the valid regions of the train station mosaic where images contribute to the
+                    final result.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Google Building Mosaic Results -->
+    <div class="section-header" style="margin: 30px 0 20px 0;">
+        <h3 style="color: white; margin-bottom: 15px; font-size: 1.4rem;">Google Building Panoramic Mosaic</h3>
+    </div>
+
+    <div class="gallery">
+        <div class="image-card">
+            <div class="image-container">
+                <img src="A.4/mosaic_result_google.jpg" alt="Google Building Mosaic" onclick="openModal(this.src)">
+            </div>
+            <div class="image-info">
+                <div class="image-title">Google Building Panoramic Mosaic</div>
+                <div class="image-filename">mosaic_result_google.jpg</div>
+                <div class="image-description">
+                    Seamless panoramic mosaic created from Google building image pair using homography transformation
+                    and feathering blending technique.
+                </div>
+            </div>
+        </div>
+
+        <div class="image-card">
+            <div class="image-container">
+                <img src="A.4/mosaic_result_mask_google.jpg" alt="Google Building Mosaic Mask"
+                    onclick="openModal(this.src)">
+            </div>
+            <div class="image-info">
+                <div class="image-title">Google Building Mosaic Blending Mask</div>
+                <div class="image-filename">mosaic_result_mask_google.jpg</div>
+                <div class="image-description">
+                    Binary mask showing the valid regions of the Google building mosaic where images contribute to the
+                    final result.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Street Scene Mosaic Results -->
+    <div class="section-header" style="margin: 30px 0 20px 0;">
+        <h3 style="color: white; margin-bottom: 15px; font-size: 1.4rem;">Street Scene Panoramic Mosaic</h3>
+    </div>
+
+    <div class="gallery">
+        <div class="image-card">
+            <div class="image-container">
+                <img src="A.4/mosaic_result_street.jpg" alt="Street Scene Mosaic" onclick="openModal(this.src)">
+            </div>
+            <div class="image-info">
+                <div class="image-title">Street Scene Panoramic Mosaic</div>
+                <div class="image-filename">mosaic_result_street.jpg</div>
+                <div class="image-description">
+                    Seamless panoramic mosaic created from street scene image pair using homography transformation and
+                    feathering blending technique.
+                </div>
+            </div>
+        </div>
+
+        <div class="image-card">
+            <div class="image-container">
+                <img src="A.4/mosaic_result_mask_street.jpg" alt="Street Scene Mosaic Mask"
+                    onclick="openModal(this.src)">
+            </div>
+            <div class="image-info">
+                <div class="image-title">Street Scene Mosaic Blending Mask</div>
+                <div class="image-filename">mosaic_result_mask_street.jpg</div>
+                <div class="image-description">
+                    Binary mask showing the valid regions of the street scene mosaic where images contribute to the
+                    final result.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div style="text-align: center; margin: 40px 0;">
+        <a href="../index.html"
+            style="display: inline-flex; align-items: center; padding: 15px 30px; background: linear-gradient(45deg, #667eea, #764ba2); color: white; text-decoration: none; border-radius: 25px; font-size: 16px; font-weight: 500; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);">
+            ← Back to Home
+        </a>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 CS180 Project 3 - Image Mosaics</p>
+        <p>Panoramic Image Stitching and Computer Vision</p>
+    </footer>
+    </div>
+
+    <!-- Modal for full-size images -->
+    <div id="imageModal" class="modal">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <img class="modal-content" id="modalImage">
+    </div>
+
+    <script>
+        function openModal(src) {
+            document.getElementById('imageModal').style.display = 'block';
+            document.getElementById('modalImage').src = src;
+        }
+
+        function closeModal() {
+            document.getElementById('imageModal').style.display = 'none';
+        }
+
+        // Close modal when clicking outside the image
+        window.onclick = function (event) {
+            const modal = document.getElementById('imageModal');
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape') {
+                closeModal();
+            }
+        });
+
+        // Add smooth scrolling
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>
