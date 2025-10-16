@@ -911,6 +911,862 @@
         </div>
     </div>
 
+    <!-- Section B.1: Harris Corner Detection and ANMS -->
+    <div class="section-header">
+        <h2>B.1 Harris Corner Detection</h2>
+        <p class="section-description">
+            Implementation of Harris Interest Point Detector for corner detection, with Adaptive Non-Maximal Suppression
+            (ANMS)
+            to optimize corner distribution. This section demonstrates the original Harris corner detection results
+            and compares them with ANMS-processed corner distributions.
+        </p>
+    </div>
+
+    <div
+        style="background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border-radius: 15px; padding: 40px; margin: 40px 0; color: white;">
+        <h2 style="color: white; margin-bottom: 30px; font-size: 2rem; text-align: center;">Harris Corner Detection
+            Theory</h2>
+        <div style="max-width: 1000px; margin: 0 auto; line-height: 1.8;">
+
+            <h3 style="color: white; margin: 30px 0 20px 0; font-size: 1.5rem;">Harris Corner Detector</h3>
+            <p style="margin-bottom: 20px; font-size: 1rem;">
+                The Harris corner detector is a classic feature point detection algorithm that identifies corners by
+                analyzing the local structure of image gradients. Corners are locations in an image with significant
+                features, showing prominent intensity changes in multiple directions. These points are crucial for
+                computer vision tasks such as image registration, object tracking, and 3D reconstruction.
+            </p>
+
+            <h3 style="color: white; margin: 30px 0 20px 0; font-size: 1.5rem;">Adaptive Non-Maximal Suppression (ANMS)
+            </h3>
+            <p style="margin-bottom: 20px; font-size: 1rem;">
+                <strong>Problem:</strong> The Harris detector typically detects a large number of corners in an image,
+                and their distribution is often non-uniform, potentially being too dense in certain regions while sparse
+                in others. This uneven distribution can adversely affect subsequent feature matching and image
+                registration.
+            </p>
+
+            <p style="margin-bottom: 20px; font-size: 1rem;">
+                <strong>Solution:</strong> The ANMS algorithm adaptively selects corners with locally maximal response
+                strength, ensuring that the selected corners are distributed more uniformly across the image. For each
+                candidate corner, ANMS computes its suppression radius—the extent within which this point is the
+                strongest
+                local corner. Finally, the algorithm selects corners with the largest suppression radii, achieving
+                optimized
+                spatial distribution while maintaining corner quality.
+            </p>
+
+            <h3 style="color: white; margin: 30px 0 20px 0; font-size: 1.5rem;">Detection Pipeline</h3>
+            <p style="margin-bottom: 20px; font-size: 1rem;">
+                1. <strong>Harris Response Computation:</strong> Calculate Harris corner response value for each
+                pixel<br>
+                2. <strong>Threshold Filtering:</strong> Select candidate corners with response values above
+                threshold<br>
+                3. <strong>ANMS Processing:</strong> Apply Adaptive Non-Maximal Suppression to select uniformly
+                distributed corner subset<br>
+                4. <strong>Visualization:</strong> Overlay detected corner positions on the original image
+            </p>
+        </div>
+    </div>
+
+    <!-- Train Image 1 Results -->
+    <div class="section-header" style="margin: 30px 0 20px 0;">
+        <h3 style="color: white; margin-bottom: 15px; font-size: 1.4rem;">Train Station Image 1 - Corner Detection
+            Results</h3>
+    </div>
+
+    <div class="gallery">
+        <div class="image-card">
+            <div class="image-container">
+                <img src="B.1/train_1_scaled_harris_corners.jpg" alt="Train 1 Harris Corners"
+                    onclick="openModal(this.src)">
+            </div>
+            <div class="image-info">
+                <div class="image-title">Harris Corner Detection Results</div>
+                <div class="image-filename">train_1_scaled_harris_corners.jpg</div>
+                <div class="image-description">
+                    All corners detected using Harris Interest Point Detector, marked with red dots overlaid on the
+                    original image.
+                    The Harris detector identifies all corner locations with significant gradient changes in the image.
+                </div>
+            </div>
+        </div>
+
+        <div class="image-card">
+            <div class="image-container">
+                <img src="B.1/train_1_scaled_strongest500.jpg" alt="Train 1 Top 500 Strongest Corners"
+                    onclick="openModal(this.src)">
+            </div>
+            <div class="image-info">
+                <div class="image-title">Top 500 Strongest Corners</div>
+                <div class="image-filename">train_1_scaled_strongest500.jpg</div>
+                <div class="image-description">
+                    Selection of the 500 strongest Harris corners based on response strength. This intermediate step
+                    filters the initial Harris detection results by selecting corners with the highest response values
+                    before applying ANMS for spatial distribution optimization.
+                </div>
+            </div>
+        </div>
+
+        <div class="image-card">
+            <div class="image-container">
+                <img src="B.1/train_1_scaled_anms_corners.jpg" alt="Train 1 ANMS Corners" onclick="openModal(this.src)">
+            </div>
+            <div class="image-info">
+                <div class="image-title">ANMS Corner Detection Results</div>
+                <div class="image-filename">train_1_scaled_anms_corners.jpg</div>
+                <div class="image-description">
+                    Corner distribution after Adaptive Non-Maximal Suppression (ANMS) processing. The ANMS algorithm
+                    selects
+                    a subset of corners with more uniform spatial distribution, reducing redundancy in dense corner
+                    regions
+                    while preserving important feature points.
+                </div>
+            </div>
+        </div>
+
+        <div class="image-card">
+            <div class="image-container">
+                <img src="B.1/train_1_scaled_comparison.jpg" alt="Train 1 Comparison" onclick="openModal(this.src)">
+            </div>
+            <div class="image-info">
+                <div class="image-title">Harris vs ANMS Comparison</div>
+                <div class="image-filename">train_1_scaled_comparison.jpg</div>
+                <div class="image-description">
+                    Side-by-side comparison of Harris corner detection (left) and ANMS processing (right). The
+                    visualization
+                    clearly shows how ANMS selects a uniformly distributed subset from dense Harris corners, improving
+                    efficiency and accuracy for subsequent feature matching.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Train Image 2 Results -->
+    <div class="section-header" style="margin: 30px 0 20px 0;">
+        <h3 style="color: white; margin-bottom: 15px; font-size: 1.4rem;">Train Station Image 2 - Corner Detection
+            Results</h3>
+    </div>
+
+    <div class="gallery">
+        <div class="image-card">
+            <div class="image-container">
+                <img src="B.1/train_2_scaled_harris_corners.jpg" alt="Train 2 Harris Corners"
+                    onclick="openModal(this.src)">
+            </div>
+            <div class="image-info">
+                <div class="image-title">Harris Corner Detection Results</div>
+                <div class="image-filename">train_2_scaled_harris_corners.jpg</div>
+                <div class="image-description">
+                    Harris corner detection results for the second train station image.
+                </div>
+            </div>
+        </div>
+
+        <div class="image-card">
+            <div class="image-container">
+                <img src="B.1/train_2_scaled_anms_corners.jpg" alt="Train 2 ANMS Corners" onclick="openModal(this.src)">
+            </div>
+            <div class="image-info">
+                <div class="image-title">ANMS Corner Detection Results</div>
+                <div class="image-filename">train_2_scaled_anms_corners.jpg</div>
+                <div class="image-description">
+                    Corner distribution for the second image after ANMS processing.
+                </div>
+            </div>
+        </div>
+
+        <div class="image-card">
+            <div class="image-container">
+                <img src="B.1/train_2_scaled_comparison.jpg" alt="Train 2 Comparison" onclick="openModal(this.src)">
+            </div>
+            <div class="image-info">
+                <div class="image-title">Harris vs ANMS Comparison</div>
+                <div class="image-filename">train_2_scaled_comparison.jpg</div>
+                <div class="image-description">
+                    Comparison of Harris detection (left) and ANMS processing (right) for the second image.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Google Building Image Results -->
+    <div class="section-header" style="margin: 30px 0 20px 0;">
+        <h3 style="color: white; margin-bottom: 15px; font-size: 1.4rem;">Google Building Image - Corner Detection
+            Results</h3>
+    </div>
+
+    <div class="gallery">
+        <div class="image-card">
+            <div class="image-container">
+                <img src="B.1/google_1_scaled_harris_corners.jpg" alt="Google Harris Corners"
+                    onclick="openModal(this.src)">
+            </div>
+            <div class="image-info">
+                <div class="image-title">Harris Corner Detection Results</div>
+                <div class="image-filename">google_1_scaled_harris_corners.jpg</div>
+                <div class="image-description">
+                    Harris corner detection results for Google building image.
+                </div>
+            </div>
+        </div>
+
+        <div class="image-card">
+            <div class="image-container">
+                <img src="B.1/google_1_scaled_anms_corners.jpg" alt="Google ANMS Corners" onclick="openModal(this.src)">
+            </div>
+            <div class="image-info">
+                <div class="image-title">ANMS Corner Detection Results</div>
+                <div class="image-filename">google_1_scaled_anms_corners.jpg</div>
+                <div class="image-description">
+                    ANMS-processed corner distribution for Google building.
+                </div>
+            </div>
+        </div>
+
+        <div class="image-card">
+            <div class="image-container">
+                <img src="B.1/google_1_scaled_comparison.jpg" alt="Google Comparison" onclick="openModal(this.src)">
+            </div>
+            <div class="image-info">
+                <div class="image-title">Harris vs ANMS Comparison</div>
+                <div class="image-filename">google_1_scaled_comparison.jpg</div>
+                <div class="image-description">
+                    Comparison of Harris detection (left) and ANMS processing (right).
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Street Scene Image Results -->
+    <div class="section-header" style="margin: 30px 0 20px 0;">
+        <h3 style="color: white; margin-bottom: 15px; font-size: 1.4rem;">Street Scene Image - Corner Detection Results
+        </h3>
+    </div>
+
+    <div class="gallery">
+        <div class="image-card">
+            <div class="image-container">
+                <img src="B.1/street_1_scaled.jpg" alt="Street Harris Corners" onclick="openModal(this.src)">
+            </div>
+            <div class="image-info">
+                <div class="image-title">Harris Corner Detection Results</div>
+                <div class="image-filename">street_1_scaled.jpg</div>
+                <div class="image-description">
+                    Harris corner detection results for street scene image.
+                </div>
+            </div>
+        </div>
+
+        <div class="image-card">
+            <div class="image-container">
+                <img src="B.1/street_1_scaled_anms_corners.jpg" alt="Street ANMS Corners" onclick="openModal(this.src)">
+            </div>
+            <div class="image-info">
+                <div class="image-title">ANMS Corner Detection Results</div>
+                <div class="image-filename">street_1_scaled_anms_corners.jpg</div>
+                <div class="image-description">
+                    ANMS-processed corner distribution for street scene.
+                </div>
+            </div>
+        </div>
+
+        <div class="image-card">
+            <div class="image-container">
+                <img src="B.1/street_1_scaled_comparison.jpg" alt="Street Comparison" onclick="openModal(this.src)">
+            </div>
+            <div class="image-info">
+                <div class="image-title">Harris vs ANMS Comparison</div>
+                <div class="image-filename">street_1_scaled_comparison.jpg</div>
+                <div class="image-description">
+                    Comparison of Harris detection (left) and ANMS processing (right).
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section B.2: Feature Descriptor Extraction -->
+    <div class="section-header">
+        <h2>B.2 Feature Descriptor Extraction</h2>
+        <p class="section-description">
+            Implementation of feature descriptor extraction for detected interest points. Each descriptor is an 8x8
+            normalized patch sampled from a larger 40x40 window around the corner, providing robust and distinctive
+            feature representations for matching.
+        </p>
+    </div>
+
+    <div
+        style="background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border-radius: 15px; padding: 40px; margin: 40px 0; color: white;">
+        <h2 style="color: white; margin-bottom: 30px; font-size: 2rem; text-align: center;">Feature Descriptor Theory
+        </h2>
+        <div style="max-width: 1000px; margin: 0 auto; line-height: 1.8;">
+
+
+            <h3 style="color: white; margin: 30px 0 20px 0; font-size: 1.5rem;">Descriptor Extraction Process</h3>
+            <p style="margin-bottom: 20px; font-size: 1rem;">
+                <strong>1. Window Sampling:</strong> For each detected corner, extract a 40x40 pixel window centered
+                at the corner location. This larger window captures sufficient context around the interest point while
+                providing spatial smoothness through implicit averaging.
+            </p>
+
+            <p style="margin-bottom: 20px; font-size: 1rem;">
+                <strong>2. Downsampling to 8x8:</strong> Downsample the 40x40 window to an 8x8 patch using area-based
+                interpolation. This method averages pixel blocks (5×5 blocks map to each output pixel), which serves
+                multiple purposes: it reduces computational cost, provides inherent noise reduction through averaging,
+                and creates a compact descriptor that is less sensitive to small spatial shifts. The area interpolation
+                is particularly effective for downsampling as it considers all source pixels contributing to each
+                destination pixel, producing a naturally blurred descriptor that is robust to minor variations.
+                The 8x8 size provides a good balance between distinctiveness and computational efficiency.
+            </p>
+
+            <p style="margin-bottom: 20px; font-size: 1rem;">
+                <strong>3. Bias and Gain Normalization:</strong> Normalize each 8x8 descriptor to have zero mean
+                (bias removal) and unit variance (gain normalization). This critical step makes the descriptor invariant
+                to affine intensity transformations, ensuring that features can be matched reliably across images with
+                different lighting conditions. The normalization formula subtracts the mean from all values and
+                divides by the standard deviation, resulting in a standardized descriptor with consistent statistical
+                properties.
+            </p>
+
+
+        </div>
+    </div>
+
+    <!-- Feature Descriptor Visualization -->
+    <div class="section-header" style="margin: 30px 0 20px 0;">
+        <h3 style="color: white; margin-bottom: 15px; font-size: 1.4rem;">Extracted Feature Descriptors Visualization
+        </h3>
+    </div>
+
+    <div style="display: flex; justify-content: center; margin-top: 30px;">
+        <div class="image-card" style="max-width: 800px; width: 100%;">
+            <div class="image-container">
+                <img src="B.2/train_1_scaled_features.jpg" alt="Train Feature Descriptors"
+                    onclick="openModal(this.src)">
+            </div>
+            <div class="image-info">
+                <div class="image-title">Train Station Feature Descriptors</div>
+                <div class="image-filename">train_1_scaled_features.jpg</div>
+                <div class="image-description">
+                    Extracted feature descriptors for train station image showing 40x40 windows, 8x8 raw patches,
+                    and normalized descriptors.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div style="display: flex; justify-content: center; margin-top: 30px;">
+        <div class="image-card" style="max-width: 800px; width: 100%;">
+            <div class="image-container">
+                <img src="B.2/google_1_scaled_features.jpg" alt="Google Feature Descriptors"
+                    onclick="openModal(this.src)">
+            </div>
+            <div class="image-info">
+                <div class="image-title">Google Building Feature Descriptors</div>
+                <div class="image-filename">google_1_scaled_features.jpg</div>
+                <div class="image-description">
+                    Extracted feature descriptors for Google building image showing 40x40 windows, 8x8 raw patches,
+                    and normalized descriptors.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div style="display: flex; justify-content: center; margin-top: 30px;">
+        <div class="image-card" style="max-width: 800px; width: 100%;">
+            <div class="image-container">
+                <img src="B.2/street_1_scaled_features.jpg" alt="Street Feature Descriptors"
+                    onclick="openModal(this.src)">
+            </div>
+            <div class="image-info">
+                <div class="image-title">Street Scene Feature Descriptors</div>
+                <div class="image-filename">street_1_scaled_features.jpg</div>
+                <div class="image-description">
+                    Extracted feature descriptors for street scene image showing 40x40 windows, 8x8 raw patches,
+                    and normalized descriptors.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    </div>
+
+    <!-- Section B.3: Feature Matching -->
+    <div class="section-header">
+        <h2>B.3 Feature Matching</h2>
+        <p class="section-description">
+            Implementation of feature matching between image pairs using descriptor distances and Lowe's ratio test
+            with threshold = 0.7. This establishes reliable correspondences between detected features across images.
+        </p>
+    </div>
+
+    <div
+        style="background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border-radius: 15px; padding: 40px; margin: 40px 0; color: white;">
+        <h2 style="color: white; margin-bottom: 30px; font-size: 2rem; text-align: center;">Feature Matching Theory</h2>
+        <div style="max-width: 1000px; margin: 0 auto; line-height: 1.8;">
+
+            <h3 style="color: white; margin: 30px 0 20px 0; font-size: 1.5rem;">Feature Matching Process</h3>
+            <p style="margin-bottom: 20px; font-size: 1rem;">
+                Feature matching establishes correspondences between interest points in different images by comparing
+                their descriptors. For each feature in the first image, we compute the distance (typically Sum of
+                Squared Differences or Euclidean distance) to all features in the second image to find potential
+                matches.
+            </p>
+
+            <h3 style="color: white; margin: 30px 0 20px 0; font-size: 1.5rem;">Lowe's Ratio Test</h3>
+            <p style="margin-bottom: 20px; font-size: 1rem;">
+                <strong>The Problem:</strong> Simply taking the nearest neighbor (descriptor with minimum distance)
+                can lead to many false matches, especially in regions with repetitive patterns or textures. We need
+                a way to assess the reliability of each match.
+            </p>
+
+            <p style="margin-bottom: 20px; font-size: 1rem;">
+                <strong>The Solution:</strong> Lowe's ratio test compares the distance to the best match against
+                the distance to the second-best match. For each feature in image 1, we find its two nearest neighbors
+                in image 2. We then compute the ratio: distance_to_nearest / distance_to_second_nearest. If this
+                ratio is below a threshold (typically 0.7), we accept the match as reliable.
+            </p>
+
+            <p style="margin-bottom: 20px; font-size: 1rem;">
+                <strong>Why It Works:</strong> A low ratio indicates that the nearest neighbor is significantly closer
+                than the second-nearest neighbor, suggesting a distinctive and reliable match. A high ratio means the
+                two nearest neighbors are similarly close, indicating ambiguity—the feature might match multiple
+                locations,
+                suggesting the match is unreliable and should be rejected.
+            </p>
+
+            <h3 style="color: white; margin: 30px 0 20px 0; font-size: 1.5rem;">Threshold Selection: 0.7</h3>
+            <p style="margin-bottom: 20px; font-size: 1rem;">
+                The threshold of 0.7 is a commonly used value that provides a good balance between match quantity and
+                quality. A lower threshold (e.g., 0.5) would result in fewer but more reliable matches, while a higher
+                threshold (e.g., 0.8 or 0.9) would accept more matches but with increased risk of false positives.
+                The value 0.7 has been empirically shown to work well across various matching scenarios, providing
+                sufficient matches for robust homography estimation while maintaining high matching accuracy.
+            </p>
+        </div>
+    </div>
+
+    <!-- Feature Matching Results -->
+    <div class="section-header" style="margin: 30px 0 20px 0;">
+        <h3 style="color: white; margin-bottom: 15px; font-size: 1.4rem;">Feature Matching Results</h3>
+        <p style="color: white; text-align: center; font-size: 0.95rem; opacity: 0.9; margin-top: 10px;">
+            The visualizations below show a random sample of 50 matches for clarity. The actual matching process
+            produces many more correspondences between the image pairs.
+        </p>
+    </div>
+
+    <div class="gallery">
+        <div class="image-card">
+            <div class="image-container">
+                <img src="B.3/train_1_scaled_to_train_2_scaled_matches.jpg" alt="Train Station Matches"
+                    onclick="openModal(this.src)">
+            </div>
+            <div class="image-info">
+                <div class="image-title">Train Station Feature Matches</div>
+                <div class="image-filename">train_1_scaled_to_train_2_scaled_matches.jpg</div>
+                <div class="image-description">
+                    Feature matches between train station image pair using Lowe's ratio test (threshold = 0.7).
+                    Showing 50 randomly selected matches.
+                </div>
+            </div>
+        </div>
+
+        <div class="image-card">
+            <div class="image-container">
+                <img src="B.3/google_1_scaled_to_google_2_scaled_matches.jpg" alt="Google Building Matches"
+                    onclick="openModal(this.src)">
+            </div>
+            <div class="image-info">
+                <div class="image-title">Google Building Feature Matches</div>
+                <div class="image-filename">google_1_scaled_to_google_2_scaled_matches.jpg</div>
+                <div class="image-description">
+                    Feature matches between Google building image pair using Lowe's ratio test (threshold = 0.7).
+                    Showing 50 randomly selected matches.
+                </div>
+            </div>
+        </div>
+
+        <div class="image-card">
+            <div class="image-container">
+                <img src="B.3/street_1_scaled_to_street_2_scaled_matches.jpg" alt="Street Scene Matches"
+                    onclick="openModal(this.src)">
+            </div>
+            <div class="image-info">
+                <div class="image-title">Street Scene Feature Matches</div>
+                <div class="image-filename">street_1_scaled_to_street_2_scaled_matches.jpg</div>
+                <div class="image-description">
+                    Feature matches between street scene image pair using Lowe's ratio test (threshold = 0.7).
+                    Showing 50 randomly selected matches.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Limitations and Next Steps -->
+    <div
+        style="background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border-radius: 15px; padding: 30px; margin: 30px 0; color: white;">
+        <h3 style="color: white; margin-bottom: 20px; font-size: 1.5rem; text-align: center;">Limitations and Outlier
+            Problem</h3>
+        <div style="max-width: 900px; margin: 0 auto; line-height: 1.8;">
+            <p style="margin-bottom: 15px; font-size: 1rem;">
+                <strong>Current Limitations:</strong> While Lowe's ratio test with threshold 0.7 successfully filters
+                out many ambiguous matches, the resulting correspondences still contain numerous outliers—incorrect
+                matches that pass the ratio test. These outliers can be observed in the visualizations as lines
+                connecting
+                features that do not actually correspond to the same physical point in 3D space.
+            </p>
+            <p style="margin-bottom: 15px; font-size: 1rem;">
+                <strong>Sources of Outliers:</strong> Outliers arise from various factors including repetitive patterns
+                (e.g., windows, tiles), textureless regions, perspective distortions, and partial occlusions. Even with
+                normalized descriptors and ratio testing, some incorrect matches inevitably slip through, particularly
+                in challenging scenes with self-similar structures.
+            </p>
+            <p style="margin-bottom: 15px; font-size: 1rem;">
+                <strong>Solution in B.4:</strong> These outliers will be addressed in the next section using RANSAC
+                (Random Sample Consensus) for robust homography estimation. RANSAC iteratively fits models to random
+                subsets of matches and identifies the largest set of inliers consistent with a single geometric
+                transformation, effectively filtering out outliers and producing reliable homographies for image
+                stitching.
+            </p>
+        </div>
+    </div>
+
+    </div>
+
+    <!-- Section B.4: RANSAC and Automatic Stitching -->
+    <div class="section-header">
+        <h2>B.4 RANSAC and Automatic Image Stitching</h2>
+        <p class="section-description">
+            Implementation of 4-point RANSAC for robust homography estimation and automatic panorama stitching.
+            This section compares manually defined correspondences (Part A) with automatically detected features
+            to demonstrate the complete feature-based image alignment pipeline.
+        </p>
+    </div>
+
+    <div
+        style="background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border-radius: 15px; padding: 40px; margin: 40px 0; color: white;">
+        <h2 style="color: white; margin-bottom: 30px; font-size: 2rem; text-align: center;">RANSAC Theory and
+            Implementation</h2>
+        <div style="max-width: 1000px; margin: 0 auto; line-height: 1.8;">
+
+            <h3 style="color: white; margin: 30px 0 20px 0; font-size: 1.5rem;">What is RANSAC?</h3>
+            <p style="margin-bottom: 20px; font-size: 1rem;">
+                RANSAC (Random Sample Consensus) is a robust iterative method for estimating mathematical models from
+                data containing outliers. Unlike least-squares approaches that are sensitive to outliers, RANSAC can
+                produce accurate results even when a significant portion of the data is corrupted by incorrect matches.
+            </p>
+
+            <h3 style="color: white; margin: 30px 0 20px 0; font-size: 1.5rem;">4-Point RANSAC Algorithm</h3>
+            <p style="margin-bottom: 20px; font-size: 1rem;">
+                <strong>Why 4 Points?</strong> A homography transformation has 8 degrees of freedom (9 parameters
+                with scale normalization). Four point correspondences provide exactly 8 constraints (2 equations per
+                point: x and y), which is the minimum needed to uniquely determine a homography matrix.
+            </p>
+
+            <p style="margin-bottom: 20px; font-size: 1rem;">
+                <strong>The Algorithm:</strong><br>
+                1. <strong>Random Sampling:</strong> Randomly select 4 point correspondences from the matched
+                features.<br>
+                2. <strong>Model Fitting:</strong> Compute the homography matrix H using these 4 points via least
+                squares.<br>
+                3. <strong>Consensus Evaluation:</strong> Apply H to all source points and count how many matches agree
+                with this transformation (inliers). A match is an inlier if the distance between the transformed point
+                and its corresponding target point is below a threshold (typically 3-5 pixels).<br>
+                4. <strong>Iteration:</strong> Repeat steps 1-3 for N iterations (typically several thousand times).<br>
+                5. <strong>Best Model Selection:</strong> Select the homography H that has the largest number of
+                inliers.<br>
+                6. <strong>Refinement:</strong> Optionally, recompute H using all identified inliers for improved
+                accuracy.
+            </p>
+
+            <h3 style="color: white; margin: 30px 0 20px 0; font-size: 1.5rem;">Why RANSAC Works</h3>
+            <p style="margin-bottom: 20px; font-size: 1rem;">
+                The probability of randomly selecting 4 correct matches (inliers) is much higher than selecting 4
+                outliers, especially when the inlier ratio is reasonable. By repeating this process many times, RANSAC
+                is highly likely to find a sample with all inliers, which produces the correct homography. Outliers
+                will occasionally form models, but these will have few supporting inliers and be rejected.
+            </p>
+
+        </div>
+    </div>
+
+    <!-- RANSAC Inlier Results -->
+    <div class="section-header" style="margin: 30px 0 20px 0;">
+        <h3 style="color: white; margin-bottom: 15px; font-size: 1.4rem;">RANSAC Inlier Detection Results</h3>
+        <p style="color: white; text-align: center; font-size: 0.95rem; opacity: 0.9; margin-top: 10px;">
+            After RANSAC filtering, only geometrically consistent matches (inliers) are retained,
+            eliminating outliers from the feature matching stage.
+        </p>
+    </div>
+
+    <div class="gallery">
+        <div class="image-card">
+            <div class="image-container">
+                <img src="B.4/train_1_scaled_to_train_2_scaled_inliers.jpg" alt="Train Station Inliers"
+                    onclick="openModal(this.src)">
+            </div>
+            <div class="image-info">
+                <div class="image-title">Train Station RANSAC Inliers</div>
+                <div class="image-filename">train_1_scaled_to_train_2_scaled_inliers.jpg</div>
+                <div class="image-description">
+                    Inlier matches after 4-point RANSAC filtering for train station image pair.
+                </div>
+            </div>
+        </div>
+
+        <div class="image-card">
+            <div class="image-container">
+                <img src="B.4/google_1_scaled_to_google_2_scaled_inliers.jpg" alt="Google Building Inliers"
+                    onclick="openModal(this.src)">
+            </div>
+            <div class="image-info">
+                <div class="image-title">Google Building RANSAC Inliers</div>
+                <div class="image-filename">google_1_scaled_to_google_2_scaled_inliers.jpg</div>
+                <div class="image-description">
+                    Inlier matches after 4-point RANSAC filtering for Google building image pair.
+                </div>
+            </div>
+        </div>
+
+        <div class="image-card">
+            <div class="image-container">
+                <img src="B.4/street_1_scaled_to_street_2_scaled_inliers.jpg" alt="Street Scene Inliers"
+                    onclick="openModal(this.src)">
+            </div>
+            <div class="image-info">
+                <div class="image-title">Street Scene RANSAC Inliers</div>
+                <div class="image-filename">street_1_scaled_to_street_2_scaled_inliers.jpg</div>
+                <div class="image-description">
+                    Inlier matches after 4-point RANSAC filtering for street scene image pair.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Manual vs Automatic Stitching Comparison -->
+    <div class="section-header" style="margin: 50px 0 20px 0;">
+        <h2 style="color: white; font-size: 1.8rem;">Manual vs Automatic Stitching Comparison</h2>
+        <p class="section-description">
+            Side-by-side comparison of mosaics created using manually selected correspondences (Part A)
+            versus automatically detected and matched features (Part B). The automatic approach demonstrates
+            comparable or superior quality while eliminating the need for manual point selection.
+        </p>
+    </div>
+
+    <!-- Train Station Comparison -->
+    <div class="section-header" style="margin: 30px 0 20px 0;">
+        <h3 style="color: white; margin-bottom: 15px; font-size: 1.4rem;">Train Station Mosaic Comparison</h3>
+    </div>
+
+    <div class="gallery">
+        <div class="image-card">
+            <div class="image-container">
+                <img src="B.4/mosaic_train.jpg" alt="Train Station Manual Mosaic" onclick="openModal(this.src)">
+            </div>
+            <div class="image-info">
+                <div class="image-title">Manual Stitching (Part A)</div>
+                <div class="image-filename">mosaic_train.jpg</div>
+                <div class="image-description">
+                    Panorama created using manually selected correspondences.
+                </div>
+            </div>
+        </div>
+
+        <div class="image-card">
+            <div class="image-container">
+                <img src="B.4/train_1_scaled_to_train_2_scaled_mosaic_auto.jpg" alt="Train Station Auto Mosaic"
+                    onclick="openModal(this.src)">
+            </div>
+            <div class="image-info">
+                <div class="image-title">Automatic Stitching (Part B)</div>
+                <div class="image-filename">train_1_scaled_to_train_2_scaled_mosaic_auto.jpg</div>
+                <div class="image-description">
+                    Panorama created using automatic feature detection and RANSAC.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Google Building Comparison -->
+    <div class="section-header" style="margin: 30px 0 20px 0;">
+        <h3 style="color: white; margin-bottom: 15px; font-size: 1.4rem;">Google Building Mosaic Comparison</h3>
+    </div>
+
+    <div class="gallery">
+        <div class="image-card">
+            <div class="image-container">
+                <img src="B.4/mosaic_result_google.jpg" alt="Google Building Manual Mosaic"
+                    onclick="openModal(this.src)">
+            </div>
+            <div class="image-info">
+                <div class="image-title">Manual Stitching (Part A)</div>
+                <div class="image-filename">mosaic_result_google.jpg</div>
+                <div class="image-description">
+                    Panorama created using manually selected correspondences.
+                </div>
+            </div>
+        </div>
+
+        <div class="image-card">
+            <div class="image-container">
+                <img src="B.4/google_1_scaled_to_google_2_scaled_mosaic_auto.jpg" alt="Google Building Auto Mosaic"
+                    onclick="openModal(this.src)">
+            </div>
+            <div class="image-info">
+                <div class="image-title">Automatic Stitching (Part B)</div>
+                <div class="image-filename">google_1_scaled_to_google_2_scaled_mosaic_auto.jpg</div>
+                <div class="image-description">
+                    Panorama created using automatic feature detection and RANSAC.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Street Scene Comparison -->
+    <div class="section-header" style="margin: 30px 0 20px 0;">
+        <h3 style="color: white; margin-bottom: 15px; font-size: 1.4rem;">Street Scene Mosaic Comparison</h3>
+    </div>
+
+    <div class="gallery">
+        <div class="image-card">
+            <div class="image-container">
+                <img src="B.4/mosaic_result_street.jpg" alt="Street Scene Manual Mosaic" onclick="openModal(this.src)">
+            </div>
+            <div class="image-info">
+                <div class="image-title">Manual Stitching (Part A)</div>
+                <div class="image-filename">mosaic_result_street.jpg</div>
+                <div class="image-description">
+                    Panorama created using manually selected correspondences.
+                </div>
+            </div>
+        </div>
+
+        <div class="image-card">
+            <div class="image-container">
+                <img src="B.4/street_1_scaled_to_street_2_scaled_mosaic_auto.jpg" alt="Street Scene Auto Mosaic"
+                    onclick="openModal(this.src)">
+            </div>
+            <div class="image-info">
+                <div class="image-title">Automatic Stitching (Part B)</div>
+                <div class="image-filename">street_1_scaled_to_street_2_scaled_mosaic_auto.jpg</div>
+                <div class="image-description">
+                    Panorama created using automatic feature detection and RANSAC.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results Analysis and Discussion -->
+    <div
+        style="background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border-radius: 15px; padding: 30px; margin: 30px 0; color: white;">
+        <h3 style="color: white; margin-bottom: 20px; font-size: 1.5rem; text-align: center;">Results Analysis and
+            Discussion</h3>
+        <div style="max-width: 900px; margin: 0 auto; line-height: 1.8;">
+
+            <h4 style="color: white; margin: 20px 0 15px 0; font-size: 1.2rem;">1. Why Are the Automatic Images Smaller?
+            </h4>
+            <p style="margin-bottom: 15px; font-size: 1rem;">
+                You might notice that the automatic stitching results are at 25% resolution compared to the manual ones.
+                This wasn't a choice—it was a necessity. My ANMS implementation ran into serious memory issues at full
+                resolution. The problem is that ANMS needs to compute distances between every pair of detected corners,
+                which has O(n²) memory complexity. When I tried running it on full-resolution images, my computer simply
+                ran out of RAM and crashed. After some trial and error, I found that scaling images down to 50% width
+                and height (which gives 25% total area) brought the memory usage down to manageable levels while still
+                keeping enough features for good matching.
+            </p>
+            <p style="margin-bottom: 15px; font-size: 1rem;">
+                The good news? Even at lower resolution, the automatic results still look great. The downsampled images
+                have hundreds of good features—way more than the 30 points I painstakingly selected by hand—so the
+                homography estimation is actually more robust.
+            </p>
+
+            <h4 style="color: white; margin: 20px 0 15px 0; font-size: 1.2rem;">2. Automatic Actually Works Better!</h4>
+            <p style="margin-bottom: 15px; font-size: 1rem;">
+                Here's what surprised me most: despite being at lower resolution, the automatic mosaics actually look
+                <em>better</em> than my manual ones. When doing manual stitching, I carefully selected about 30
+                correspondence points per image pair—which felt like a lot of work! But the automatic pipeline finds
+                hundreds of verified matches after RANSAC filtering. This means the homography is computed from way
+                more data points spread across the entire overlap region.
+            </p>
+            <p style="margin-bottom: 15px; font-size: 1rem;">
+                The difference really shows in the artifacts. My manual mosaics have some visible ghosting and blending
+                seams where things don't quite line up perfectly. The automatic versions? Much cleaner. I think this
+                happens for two reasons: First, more points means a more accurate homography that works well across the
+                whole image, not just where I happened to click. Second, ANMS spreads the feature points uniformly, so
+                every part of the overlap gets represented—unlike my manual selections, which were probably biased
+                toward easier-to-identify corners.
+            </p>
+
+            <h4 style="color: white; margin: 20px 0 15px 0; font-size: 1.2rem;">3. The Street Scene Mystery: A Debugging
+                Story</h4>
+            <p style="margin-bottom: 15px; font-size: 1rem;">
+                Now for the frustrating part: the street scene. I tested multiple image pairs, and only this one
+                consistently looked terrible in both manual and automatic stitching. At first, I thought my code was
+                broken, but the fact that <em>both</em> methods failed on the same images was actually a clue.
+            </p>
+            <p style="margin-bottom: 15px; font-size: 1rem;">
+                So I started debugging systematically to figure out what was wrong:
+            </p>
+            <ul style="margin-bottom: 15px; font-size: 1rem; padding-left: 30px;">
+                <li style="margin-bottom: 10px;">
+                    <strong>First, I checked the matches:</strong> I cranked the RANSAC threshold down to 0.5 pixels
+                    (way stricter than the usual 3-5 pixels) for the street scene. Even with this super tight threshold,
+                    the inliers still showed good geometric consistency. So the feature matching was definitely finding
+                    real correspondences—not random noise.
+                </li>
+                <li style="margin-bottom: 10px;">
+                    <strong>Then I verified the blending:</strong> The train station and Google building mosaics both
+                    look great with smooth transitions and no weird artifacts. This proved my feathering implementation
+                    works fine when the images are properly aligned.
+                </li>
+                <li style="margin-bottom: 10px;">
+                    <strong>The clincher was the manual failure:</strong> When even my carefully hand-picked
+                    correspondence points couldn't produce a good result, I knew it wasn't a bug in Harris detection,
+                    ANMS, descriptor extraction, or RANSAC. Those steps aren't even used in manual stitching!
+                </li>
+            </ul>
+            <p style="margin-bottom: 15px; font-size: 1rem;">
+                <strong>My conclusion:</strong> If both methods fail on the same images while everything else works,
+                the problem isn't in my code—it's in the images themselves. I must have messed up when taking the
+                photos.
+                Homography-based stitching has a key assumption: the scene should be roughly planar, or you need to
+                rotate
+                the camera around its optical center without any sideways movement.
+            </p>
+            <p style="margin-bottom: 15px; font-size: 1rem;">
+                <strong>What probably went wrong when I took the street photos:</strong>
+            </p>
+            <ul style="margin-bottom: 15px; font-size: 1rem; padding-left: 30px;">
+                <li style="margin-bottom: 10px;">
+                    <strong>Camera translation (most likely):</strong> I probably moved the camera sideways a bit
+                    instead
+                    of just rotating it. This creates parallax—objects at different depths shift by different amounts.
+                    Street scenes are especially bad for this because you've got stuff at all different distances: trees
+                    and poles up close, buildings in the middle, sky in the back. Even a small sideways movement makes
+                    it impossible for a single homography to align everything correctly.
+                </li>
+                <li style="margin-bottom: 10px;">
+                    <strong>Moving objects:</strong> Street scenes have cars, people walking, trees swaying in the wind.
+                    If anything moved between when I took the two photos, those objects will be in different positions
+                    and create ghosting that can't be fixed no matter how good the alignment is.
+                </li>
+                <li style="margin-bottom: 10px;">
+                    <strong>Too much depth variation:</strong> Unlike the train station interior (pretty flat) or the
+                    Google building facade (basically a wall), the street has tons of depth. A single homography can't
+                    handle this if there's any camera motion beyond pure rotation.
+                </li>
+            </ul>
+            <p style="margin-bottom: 15px; font-size: 1rem;">
+                <strong>Lesson learned:</strong> You can't fix bad images with good code. Even perfect algorithms fail
+                when you violate their assumptions. For panoramas, this means being really careful when taking photos—
+                rotate the camera, don't move it sideways, and pick scenes that don't have too much depth or moving
+                stuff.
+                The street scene failure actually taught me more about panorama stitching than the successful ones did!
+            </p>
+        </div>
+    </div>
+
+    </div>
+
     <div style="text-align: center; margin: 40px 0;">
         <a href="../index.html"
             style="display: inline-flex; align-items: center; padding: 15px 30px; background: linear-gradient(45deg, #667eea, #764ba2); color: white; text-decoration: none; border-radius: 25px; font-size: 16px; font-weight: 500; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);">
