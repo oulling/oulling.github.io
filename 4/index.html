@@ -1,0 +1,1251 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CS180 Project 4: NeRF Construction</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-link {
+            margin-bottom: 30px;
+        }
+
+        .back-link a {
+            display: inline-flex;
+            align-items: center;
+            padding: 10px 20px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .back-link a:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+            background: linear-gradient(45deg, #764ba2, #667eea);
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+            padding: 40px 0;
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 20px;
+        }
+
+        .description {
+            max-width: 800px;
+            margin: 0 auto;
+            font-size: 1rem;
+            opacity: 0.8;
+            line-height: 1.8;
+        }
+
+        .section-header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 40px 0 30px 0;
+            color: white;
+            text-align: center;
+        }
+
+        .section-header h2 {
+            color: white;
+            margin-bottom: 15px;
+            font-size: 1.8rem;
+        }
+
+        .section-description {
+            font-size: 1rem;
+            opacity: 0.9;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+            align-items: start;
+        }
+
+        .image-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .image-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .image-container {
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #f8f9fa;
+            min-height: 200px;
+        }
+
+        .image-container img {
+            width: 100%;
+            height: auto;
+            max-height: 400px;
+            object-fit: contain;
+            transition: transform 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        .image-card:hover .image-container img {
+            transform: scale(1.05);
+        }
+
+        .image-info {
+            padding: 20px;
+        }
+
+        .image-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .image-filename {
+            font-size: 0.85rem;
+            color: #666;
+            font-family: 'Courier New', monospace;
+            margin-bottom: 10px;
+        }
+
+        .image-description {
+            font-size: 0.9rem;
+            color: #555;
+            line-height: 1.5;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            animation: fadeIn 0.3s;
+        }
+
+        .modal-content {
+            margin: auto;
+            display: block;
+            width: 90%;
+            max-width: 1200px;
+            max-height: 90vh;
+            object-fit: contain;
+            animation: zoomIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes zoomIn {
+            from {
+                transform: scale(0.5);
+            }
+
+            to {
+                transform: scale(1);
+            }
+        }
+
+        .close {
+            position: absolute;
+            top: 30px;
+            right: 45px;
+            color: #f1f1f1;
+            font-size: 40px;
+            font-weight: bold;
+            transition: 0.3s;
+            cursor: pointer;
+            z-index: 1001;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: #bbb;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px 0;
+            color: white;
+            margin-top: 60px;
+        }
+
+        footer p {
+            margin: 10px 0;
+            opacity: 0.8;
+        }
+
+        .training-progression {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 15px;
+            margin: 30px 0;
+        }
+
+        .training-progression .image-card {
+            margin: 0;
+        }
+
+        .grid-2x2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 25px;
+            margin: 30px 0;
+        }
+
+        .grid-2x2 .image-card {
+            margin: 0;
+        }
+
+        @media (max-width: 768px) {
+            .training-progression {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .grid-2x2 {
+                grid-template-columns: 1fr;
+            }
+
+            /* Stack side-by-side grids vertically on mobile */
+            div[style*="grid-template-columns: 1fr 1fr"] {
+                grid-template-columns: 1fr !important;
+                gap: 30px !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="back-link">
+            <a href="../index.html">← Back to Home</a>
+        </div>
+
+        <header>
+            <h1>CS180 Project 4</h1>
+            <p class="subtitle">NeRF Construction</p>
+            <p class="description">
+                This project focuses on building Neural Radiance Fields (NeRF) for 3D scene representation.
+                Part 1 explores neural fields in 2D space as a foundational step before extending to full 3D NeRF.
+                We begin by implementing a 2D neural field to fit images using coordinate-based neural networks,
+                then progress to 3D NeRF for volumetric scene representation and novel view synthesis.
+            </p>
+        </header>
+
+        <!-- Part 0: Camera Calibration and 3D Scanning -->
+        <div class="section-header">
+            <h2>Part 0: Camera Calibration and 3D Scanning</h2>
+            <p class="section-description">
+                Before training a NeRF model, we need to calibrate our cameras and understand their positions in 3D
+                space.
+                This involves camera calibration to determine intrinsic parameters (focal length, principal point) and
+                extrinsic parameters (camera poses). The visualization shows camera frustums arranged around the scene,
+                demonstrating the multi-view setup used for 3D reconstruction.
+            </p>
+        </div>
+
+        <div class="grid-2x2">
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="part0/camera1.png" alt="Camera Frustums Visualization 1" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Camera Frustums Visualization - View 1</div>
+                    <div class="image-filename">camera1.png</div>
+                    <div class="image-description">
+                        3D visualization of camera frustums showing the multi-view camera setup. Each frustum represents
+                        a camera's field of view, with cameras arranged in a semi-circular arc pointing towards the
+                        central
+                        scene. The coordinate system and camera positions are clearly visible, demonstrating the
+                        calibrated
+                        camera poses used for NeRF training.
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="part0/camera2.png" alt="Camera Frustums Visualization 2" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Camera Frustums Visualization - View 2</div>
+                    <div class="image-filename">camera2.png</div>
+                    <div class="image-description">
+                        Alternative view of the camera frustums visualization, showing the 3D arrangement of cameras
+                        around
+                        the scene. The wireframe frustums illustrate each camera's viewing angle and position, with some
+                        frustums highlighted to indicate different camera states or processing stages. This
+                        visualization
+                        helps verify that camera calibration and pose estimation are correct.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Part 1: Model Architecture -->
+        <div class="section-header">
+            <h2>Part 1: Fit a Neural Field to a 2D Image</h2>
+            <p class="section-description">
+                From the lecture we know that we can use a Neural Radiance Field (NeRF) to represent a 3D space.
+                But before jumping into 3D, let's first get familiar with NeRF (and PyTorch) using a 2D example.
+                In fact, since there is no concept of radiance in 2D, the Neural Radiance Field falls back to just
+                a Neural Field in 2D, in which the input is the pixel coordinate. In this section, we will create
+                a neural field that can represent a 2D image and optimize that neural field to fit this image.
+            </p>
+        </div>
+
+        <div
+            style="background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border-radius: 15px; padding: 40px; margin: 40px 0; color: white;">
+            <h2 style="color: white; margin-bottom: 30px; font-size: 2rem; text-align: center;">Model Architecture</h2>
+            <div style="max-width: 1000px; margin: 0 auto; line-height: 1.8;">
+
+                <!-- Model Architecture Diagram -->
+                <div style="display: flex; justify-content: center; margin: 30px 0;">
+                    <div style="max-width: 100%; width: 100%;">
+                        <img src="part1/model.png" alt="Neural Field Model Architecture"
+                            style="width: 100%; max-width: 800px; height: auto; border-radius: 10px; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3); cursor: pointer;"
+                            onclick="openModal(this.src)">
+                    </div>
+                </div>
+                <p style="text-align: center; font-size: 0.9rem; opacity: 0.9; margin-bottom: 30px; color: white;">
+                    Neural Field architecture diagram showing the coordinate-based neural network structure for 2D image
+                    reconstruction.
+                </p>
+
+                <h3 style="color: white; margin: 30px 0 20px 0; font-size: 1.5rem;">Default Configuration</h3>
+                <div style="background: rgba(255, 255, 255, 0.1); padding: 25px; border-radius: 10px; margin: 20px 0;">
+                    <p style="margin-bottom: 10px; font-size: 1rem;"><strong>Number of Layers:</strong> 3 hidden layers
+                    </p>
+                    <p style="margin-bottom: 10px; font-size: 1rem;"><strong>Network Width:</strong> 256 neurons per
+                        hidden layer</p>
+                    <p style="margin-bottom: 10px; font-size: 1rem;"><strong>Max Positional Encoding Frequency:</strong>
+                        10</p>
+                    <p style="margin-bottom: 0; font-size: 1rem;"><strong>Learning Rate:</strong> 1.0 × 10⁻² (0.01)
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Original Images -->
+        <div class="section-header">
+            <h2>Original Images</h2>
+            <p class="section-description">
+                Ground truth images used for neural image reconstruction training and evaluation.
+            </p>
+        </div>
+
+        <div class="gallery">
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="part1/Image.jpg" alt="Original Test Image - Fox" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Original Test Image: Fox</div>
+                    <div class="image-filename">Image.jpg</div>
+                    <div class="image-description">
+                        Ground truth test image used for neural network training. This is the target image that the
+                        network learns to reconstruct from coordinate inputs.
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="part1/shanghaitech.jpg" alt="Original Custom Image - ShanghaiTech"
+                        onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Original Custom Image: ShanghaiTech</div>
+                    <div class="image-filename">shanghaitech.jpg</div>
+                    <div class="image-description">
+                        Ground truth custom image used for neural network training. This image demonstrates the
+                        network's ability to learn complex scenes with varied textures and structures.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Training Progression -->
+        <div class="section-header">
+            <h2>Training Progression</h2>
+            <p class="section-description">
+                Visualization of training progress showing image reconstruction at different iterations. The network
+                gradually learns to reconstruct images from coordinate inputs, progressing from initial noise to
+                detailed reconstructions. Default configuration: 3 layers, 256 width, Freq=10, Learning Rate=10⁻².
+            </p>
+        </div>
+
+        <!-- Fox Training Progression -->
+        <div class="section-header" style="margin: 30px 0 20px 0;">
+            <h3 style="color: white; margin-bottom: 15px; font-size: 1.4rem;">Test Image: Fox</h3>
+        </div>
+
+        <div class="training-progression">
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="part1/fox/reconstructed_image_freq10_dim256_iter0.jpg" alt="Fox Iteration 0"
+                        onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Iteration 0</div>
+                    <div class="image-filename">Initial State</div>
+                    <div class="image-description">
+                        Initial reconstruction showing uninitialized or completely unoptimized state.
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="part1/fox/reconstructed_image_freq10_dim256_iter500.jpg" alt="Fox Iteration 500"
+                        onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Iteration 500</div>
+                    <div class="image-filename">Early Training</div>
+                    <div class="image-description">
+                        Early training stage showing blurry and pixelated outline beginning to form.
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="part1/fox/reconstructed_image_freq10_dim256_iter1000.jpg" alt="Fox Iteration 1000"
+                        onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Iteration 1000</div>
+                    <div class="image-filename">Mid Training</div>
+                    <div class="image-description">
+                        Mid training stage with recognizable features becoming visible.
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="part1/fox/reconstructed_image_freq10_dim256_iter1500.jpg" alt="Fox Iteration 1500"
+                        onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Iteration 1500</div>
+                    <div class="image-filename">Advanced Training</div>
+                    <div class="image-description">
+                        Advanced training stage with clearer representation and well-defined features.
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="part1/fox/reconstructed_image_freq10_dim256_iter2000.jpg" alt="Fox Iteration 2000"
+                        onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Iteration 2000</div>
+                    <div class="image-filename">Final Result</div>
+                    <div class="image-description">
+                        Final reconstruction showing sharp, detailed, and realistic image with intricate features.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ShanghaiTech Training Progression -->
+        <div class="section-header" style="margin: 30px 0 20px 0;">
+            <h3 style="color: white; margin-bottom: 15px; font-size: 1.4rem;">Custom Image: ShanghaiTech</h3>
+        </div>
+
+        <div class="training-progression">
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="part1/shanghaitech/reconstructed_image_freq10_dim256_iter0.jpg"
+                        alt="ShanghaiTech Iteration 0" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Iteration 0</div>
+                    <div class="image-filename">Initial State</div>
+                    <div class="image-description">
+                        Initial reconstruction showing uninitialized or completely unoptimized state.
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="part1/shanghaitech/reconstructed_image_freq10_dim256_iter500.jpg"
+                        alt="ShanghaiTech Iteration 500" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Iteration 500</div>
+                    <div class="image-filename">Early Training</div>
+                    <div class="image-description">
+                        Early training stage showing blurry and pixelated outline beginning to form.
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="part1/shanghaitech/reconstructed_image_freq10_dim256_iter1000.jpg"
+                        alt="ShanghaiTech Iteration 1000" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Iteration 1000</div>
+                    <div class="image-filename">Mid Training</div>
+                    <div class="image-description">
+                        Mid training stage with recognizable features becoming visible.
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="part1/shanghaitech/reconstructed_image_freq10_dim256_iter1500.jpg"
+                        alt="ShanghaiTech Iteration 1500" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Iteration 1500</div>
+                    <div class="image-filename">Advanced Training</div>
+                    <div class="image-description">
+                        Advanced training stage with clearer representation and well-defined features.
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="part1/shanghaitech/reconstructed_image_freq10_dim256_iter2000.jpg"
+                        alt="ShanghaiTech Iteration 2000" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Iteration 2000</div>
+                    <div class="image-filename">Final Result</div>
+                    <div class="image-description">
+                        Final reconstruction showing sharp, detailed, and realistic image with intricate features.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hyperparameter Comparison -->
+        <div class="section-header">
+            <h2>Hyperparameter Comparison</h2>
+            <p class="section-description">
+                Comparison of final reconstruction results (at iteration 2000) with different hyperparameter
+                configurations. Testing various combinations of max positional encoding frequency and network width
+                to understand their impact on reconstruction quality. The 2×2 grid demonstrates how these
+                hyperparameters affect the final output.
+            </p>
+        </div>
+
+        <!-- Hyperparameter Comparison Grids -->
+        <div class="section-header" style="margin: 30px 0 20px 0;">
+            <h3 style="color: white; margin-bottom: 15px; font-size: 1.4rem;">Final Results Comparison (Iteration 2000)
+            </h3>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin: 30px 0;">
+            <!-- Fox Hyperparameter Grid -->
+            <div>
+                <h4 style="color: white; margin-bottom: 20px; font-size: 1.2rem; text-align: center;">Test Image: Fox
+                </h4>
+                <div class="grid-2x2">
+                    <div class="image-card">
+                        <div class="image-container">
+                            <img src="part1/fox/reconstructed_image_freq10_dim256_iter2000.jpg"
+                                alt="Fox Freq=10, Width=256" onclick="openModal(this.src)">
+                        </div>
+                        <div class="image-info">
+                            <div class="image-title">Freq=10, Width=256</div>
+                            <div class="image-filename">Medium Frequency, Medium Width</div>
+                            <div class="image-description">
+                                Default configuration with medium positional encoding frequency and medium network
+                                width.
+                                Balanced representation with good detail capture and smooth reconstruction.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="image-card">
+                        <div class="image-container">
+                            <img src="part1/fox/reconstructed_image_freq15_dim256_iter2000.jpg"
+                                alt="Fox Freq=15, Width=256" onclick="openModal(this.src)">
+                        </div>
+                        <div class="image-info">
+                            <div class="image-title">Freq=15, Width=256</div>
+                            <div class="image-filename">High Frequency, Medium Width</div>
+                            <div class="image-description">
+                                High positional encoding frequency with medium network width. Captures more fine-grained
+                                details
+                                but may show artifacts from overfitting.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="image-card">
+                        <div class="image-container">
+                            <img src="part1/fox/reconstructed_image_freq10_dim384_iter2000.jpg"
+                                alt="Fox Freq=10, Width=384" onclick="openModal(this.src)">
+                        </div>
+                        <div class="image-info">
+                            <div class="image-title">Freq=10, Width=384</div>
+                            <div class="image-filename">Medium Frequency, Large Width</div>
+                            <div class="image-description">
+                                Medium positional encoding frequency with wide network width. Increased capacity enables
+                                better
+                                detail capture while maintaining balanced frequency representation.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="image-card">
+                        <div class="image-container">
+                            <img src="part1/fox/reconstructed_image_freq15_dim384_iter2000.jpg"
+                                alt="Fox Freq=15, Width=384" onclick="openModal(this.src)">
+                        </div>
+                        <div class="image-info">
+                            <div class="image-title">Freq=15, Width=384</div>
+                            <div class="image-filename">High Frequency, Large Width</div>
+                            <div class="image-description">
+                                High positional encoding frequency with wide network width. Maximum capacity
+                                configuration
+                                showing highest level of detail and complexity.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ShanghaiTech Hyperparameter Grid -->
+            <div>
+                <h4 style="color: white; margin-bottom: 20px; font-size: 1.2rem; text-align: center;">Custom Image:
+                    ShanghaiTech</h4>
+                <div class="grid-2x2">
+                    <div class="image-card">
+                        <div class="image-container">
+                            <img src="part1/shanghaitech/reconstructed_image_freq10_dim256_iter2000.jpg"
+                                alt="ShanghaiTech Freq=10, Width=256" onclick="openModal(this.src)">
+                        </div>
+                        <div class="image-info">
+                            <div class="image-title">Freq=10, Width=256</div>
+                            <div class="image-filename">Medium Frequency, Medium Width</div>
+                            <div class="image-description">
+                                Default configuration with medium positional encoding frequency and medium network
+                                width.
+                                Balanced representation with good detail capture and smooth reconstruction.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="image-card">
+                        <div class="image-container">
+                            <img src="part1/shanghaitech/reconstructed_image_freq15_dim256_iter2000.jpg"
+                                alt="ShanghaiTech Freq=15, Width=256" onclick="openModal(this.src)">
+                        </div>
+                        <div class="image-info">
+                            <div class="image-title">Freq=15, Width=256</div>
+                            <div class="image-filename">High Frequency, Medium Width</div>
+                            <div class="image-description">
+                                High positional encoding frequency with medium network width. Captures more fine-grained
+                                details
+                                but may show artifacts from overfitting.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="image-card">
+                        <div class="image-container">
+                            <img src="part1/shanghaitech/reconstructed_image_freq10_dim384_iter2000.jpg"
+                                alt="ShanghaiTech Freq=10, Width=384" onclick="openModal(this.src)">
+                        </div>
+                        <div class="image-info">
+                            <div class="image-title">Freq=10, Width=384</div>
+                            <div class="image-filename">Medium Frequency, Large Width</div>
+                            <div class="image-description">
+                                Medium positional encoding frequency with wide network width. Increased capacity enables
+                                better
+                                detail capture while maintaining balanced frequency representation.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="image-card">
+                        <div class="image-container">
+                            <img src="part1/shanghaitech/reconstructed_image_freq15_dim384_iter2000.jpg"
+                                alt="ShanghaiTech Freq=15, Width=384" onclick="openModal(this.src)">
+                        </div>
+                        <div class="image-info">
+                            <div class="image-title">Freq=15, Width=384</div>
+                            <div class="image-filename">High Frequency, Large Width</div>
+                            <div class="image-description">
+                                High positional encoding frequency with wide network width. Maximum capacity
+                                configuration
+                                showing highest level of detail and complexity.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- PSNR Training Curve -->
+        <div class="section-header">
+            <h2>PSNR Training Curve</h2>
+            <p class="section-description">
+                Peak Signal-to-Noise Ratio (PSNR) curve showing training progression over iterations.
+                This metric quantifies the reconstruction quality improvement throughout the training process.
+                Higher PSNR values indicate better reconstruction quality.
+            </p>
+        </div>
+
+        <div style="display: flex; justify-content: center; margin: 30px 0;">
+            <div class="image-card" style="max-width: 1000px; width: 100%;">
+                <div class="image-container">
+                    <img src="part1/psnr_curve_freq15_dim384.png" alt="PSNR Training Curve"
+                        onclick="openModal(this.src)">
+                </div>
+            </div>
+        </div>
+
+        <!-- Part 2: Neural Radiance Field from Multi-view Images -->
+        <div class="section-header">
+            <h2>Part 2: Fit a Neural Radiance Field from Multi-view Images</h2>
+            <p class="section-description">
+                Extending the 2D neural field to 3D space, we implement a Neural Radiance Field (NeRF) that learns
+                to represent 3D scenes from multi-view images. This part involves volumetric rendering, ray sampling,
+                and training a coordinate-based neural network to predict color and density at any 3D point in space.
+                The network learns to synthesize novel views of complex 3D objects like the Lego dataset.
+            </p>
+        </div>
+
+        <!-- Implementation Description -->
+        <div
+            style="background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border-radius: 15px; padding: 40px; margin: 40px 0; color: white;">
+            <h2 style="color: white; margin-bottom: 30px; font-size: 2rem; text-align: center;">Implementation Overview
+            </h2>
+            <div style="max-width: 1000px; margin: 0 auto; line-height: 1.8;">
+                <h3 style="color: white; margin: 30px 0 20px 0; font-size: 1.5rem;">NeRF Standard Pipeline</h3>
+                <div style="background: rgba(255, 255, 255, 0.1); padding: 25px; border-radius: 10px; margin: 20px 0;">
+                    <p style="margin-bottom: 15px; font-size: 1rem;">
+                        The NeRF pipeline works like this: For each pixel in an image, we shoot a ray from the
+                        camera through that pixel into 3D space. Along each ray, we sample multiple 3D points (think of
+                        them as checkpoints along the ray). For each point, we encode its 3D position and viewing
+                        direction
+                        using positional encoding, then feed it to a neural network (MLP). The network predicts what
+                        color
+                        and how "solid" (density) each point is. Finally, we blend all these colors together along the
+                        ray
+                        using volume rendering to get the final pixel color. During training, we compare our rendered
+                        images
+                        with the real images and update the network to make them match better.
+                    </p>
+                </div>
+
+                <!-- Model Architecture Diagram -->
+                <div style="display: flex; justify-content: center; margin: 30px 0;">
+                    <div style="max-width: 100%; width: 100%;">
+                        <img src="part2/model.png" alt="NeRF Model Architecture"
+                            style="width: 100%; max-width: 800px; height: auto; border-radius: 10px; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3); cursor: pointer;"
+                            onclick="openModal(this.src)">
+                    </div>
+                </div>
+                <p style="text-align: center; font-size: 0.9rem; opacity: 0.9; margin-bottom: 30px; color: white;">
+                    NeRF model architecture diagram showing the complete pipeline from ray sampling to volume rendering.
+                </p>
+
+
+
+                <h3 style="color: white; margin: 40px 0 20px 0; font-size: 1.5rem;">Detailed Implementation Steps</h3>
+
+                <div style="background: rgba(255, 255, 255, 0.1); padding: 25px; border-radius: 10px; margin: 20px 0;">
+                    <h4 style="color: white; margin: 20px 0 15px 0; font-size: 1.2rem;">Part 2.1: Create Rays from
+                        Cameras</h4>
+
+                    <p style="margin-bottom: 15px; font-size: 1rem;">
+                        <strong>Camera to World Coordinate Conversion:</strong> When we have a point in camera
+                        coordinates,
+                        we need to figure out where it is in the real world. This is basically rotating and moving the
+                        point based on where and how the camera is positioned.
+                    </p>
+
+                    <p style="margin-bottom: 15px; font-size: 1rem;">
+                        <strong>Pixel to Camera Coordinate Conversion:</strong> When we look at a pixel in an image, we
+                        want
+                        to know what 3D point it corresponds to. It's like asking "if I look at this pixel, where am I
+                        actually looking in 3D space?" We use the camera's settings (like focal length) to figure this
+                        out.
+                    </p>
+
+                    <p style="margin-bottom: 0; font-size: 1rem;">
+                        <strong>Pixel to Ray:</strong> Put it all together - we take a pixel, figure out where the
+                        camera
+                        is in the world, and figure out which direction that pixel is looking. Now we have a ray that
+                        starts
+                        at the camera and goes through that pixel into 3D space. That's what we need to query the neural
+                        network.
+                    </p>
+                </div>
+
+                <div style="background: rgba(255, 255, 255, 0.1); padding: 25px; border-radius: 10px; margin: 20px 0;">
+                    <h4 style="color: white; margin: 20px 0 15px 0; font-size: 1.2rem;">Part 2.2: Sampling</h4>
+
+                    <p style="margin-bottom: 15px; font-size: 1rem;">
+                        <strong>Sampling Rays from Images:</strong> We have a bunch of images taken from different
+                        angles.
+                        We randomly pick some pixels from these images and turn them into rays. One small detail - we
+                        add
+                        0.5 to pixel coordinates because pixels are measured at their corners, but we want the center.
+                        You
+                        can either pick images first and then sample rays from each, or just mix all pixels together and
+                        sample randomly. Both work fine.
+                    </p>
+
+                    <p style="margin-bottom: 0; font-size: 1rem;">
+                        <strong>Sampling Points along Rays:</strong> Once we have a ray, we need to check several points
+                        along it. We evenly space these points between a near distance (2.0) and far distance (6.0) for
+                        the Lego scene. During training, we add a tiny bit of randomness to each point so the network
+                        doesn't memorize exact positions. Usually we check about 32 or 64 points per ray.
+                    </p>
+                </div>
+
+                <div style="background: rgba(255, 255, 255, 0.1); padding: 25px; border-radius: 10px; margin: 20px 0;">
+                    <h4 style="color: white; margin: 20px 0 15px 0; font-size: 1.2rem;">Part 2.3: Putting the
+                        Dataloading All Together</h4>
+
+                    <p style="margin-bottom: 0; font-size: 1rem;">
+                        Put everything together into a dataloader. It randomly picks pixels from our collection of
+                        images
+                        and converts them into rays. For each ray, it returns where the ray starts, which direction it
+                        goes,
+                        and what color that pixel should be. To make sure everything works, we can visualize the
+                        cameras,
+                        rays, and sample points in 3D.
+                    </p>
+                </div>
+
+                <div style="background: rgba(255, 255, 255, 0.1); padding: 25px; border-radius: 10px; margin: 20px 0;">
+                    <h4 style="color: white; margin: 20px 0 15px 0; font-size: 1.2rem;">Part 2.5: Volume Rendering</h4>
+
+                    <p style="margin-bottom: 0; font-size: 1rem;">
+                        This is where we turn all those sampled points into a final pixel color. We take the colors from
+                        all the points along the ray and blend them together. But not all points contribute equally -
+                        points
+                        that are more "solid" (dense) contribute more, and if the ray already hit something opaque
+                        before
+                        reaching a point, that point doesn't contribute much. It's like mixing paint colors, but the
+                        amount of each color depends on how solid the material is. Make sure your implementation passes
+                        the verification tests to confirm it's working correctly.
+                    </p>
+                </div>
+
+                <div style="background: rgba(255, 255, 255, 0.1); padding: 25px; border-radius: 10px; margin: 20px 0;">
+                    <h4 style="color: white; margin: 20px 0 15px 0; font-size: 1.2rem;">Part 2.6: Training Model</h4>
+
+                    <p style="margin-bottom: 15px; font-size: 1rem;">
+                        <strong>Forward Pass:</strong> For each batch of rays, we check points along them and ask the
+                        network "what color and how solid is it here?" Then we blend all those answers together using
+                        volume rendering to get the final pixel color.
+                    </p>
+
+                    <p style="margin-bottom: 15px; font-size: 1rem;">
+                        <strong>Loss Calculation:</strong> We compare our rendered colors with the actual colors from
+                        the
+                        training images. The difference tells us how wrong we are - we use MSE (mean squared error) to
+                        measure this.
+                    </p>
+
+                    <p style="margin-bottom: 0; font-size: 1rem;">
+                        <strong>Backward Pass:</strong> Based on how wrong we were, we figure out how to adjust the
+                        network's weights to do better next time. Over many iterations, the network gradually learns
+                        what colors and densities to predict at each 3D location. We keep an eye on the PSNR metric on
+                        the validation set to see how well it's learning.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ray Visualization -->
+        <div class="section-header">
+            <h2>Ray and Sample Visualization</h2>
+            <p class="section-description">
+                Visualization of rays and sampling points with camera positions. This demonstrates how rays are cast
+                from camera viewpoints through the scene, and how sampling points are distributed along each ray for
+                volume rendering. The visualization shows up to 100 rays to illustrate the ray casting and sampling
+                process.
+            </p>
+        </div>
+
+        <div class="grid-2x2">
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="part2/check1.png" alt="Ray Visualization 1" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Ray Visualization - View 1</div>
+                    <div class="image-filename">check1.png</div>
+                    <div class="image-description">
+                        Visualization of rays cast from camera viewpoints through the 3D scene. Each ray is shown
+                        with its sampling points along the path, demonstrating how the network samples 3D space for
+                        volume rendering.
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="part2/check2.png" alt="Ray Visualization 2" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Ray Visualization - View 2</div>
+                    <div class="image-filename">check2.png</div>
+                    <div class="image-description">
+                        Alternative viewpoint showing ray casting and sampling geometry. The visualization helps
+                        understand how the hierarchical sampling strategy distributes samples along rays, with
+                        higher density in regions of interest.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Training Progression -->
+        <div class="section-header">
+            <h2>Training Progression</h2>
+            <p class="section-description">
+                Visualization of training progress showing predicted images across different training iterations.
+                The network gradually learns to reconstruct the 3D scene from multi-view images, progressing from
+                initial noise to detailed reconstructions with accurate geometry and appearance.
+            </p>
+        </div>
+
+        <div style="display: flex; justify-content: center; margin: 30px 0;">
+            <div class="image-card" style="max-width: 1200px; width: 100%;">
+                <div class="image-container">
+                    <img src="part2/training_progress.png" alt="Training Progression" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Training Progression Visualization</div>
+                    <div class="image-filename">training_progress.png</div>
+                    <div class="image-description">
+                        Side-by-side comparison of predicted images at different training iterations. Shows the
+                        progressive improvement in reconstruction quality, from blurry initial predictions to sharp,
+                        detailed final renderings that closely match the ground truth multi-view images.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PSNR Curve -->
+        <div class="section-header">
+            <h2>PSNR Curve on Validation Set</h2>
+            <p class="section-description">
+                Peak Signal-to-Noise Ratio (PSNR) curve showing validation performance throughout training. This
+                metric quantifies the reconstruction quality on the validation set, demonstrating how the network
+                improves over iterations. Higher PSNR values indicate better reconstruction quality and better
+                generalization to novel viewpoints.
+            </p>
+        </div>
+
+        <div style="display: flex; justify-content: center; margin: 30px 0;">
+            <div class="image-card" style="max-width: 1000px; width: 100%;">
+                <div class="image-container">
+                    <img src="part2/training_curves.png" alt="PSNR Training Curve" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">PSNR Training Curve</div>
+                    <div class="image-filename">training_curves.png</div>
+                    <div class="image-description">
+                        Validation PSNR curve showing the network's learning progress. The curve demonstrates
+                        convergence over training iterations, with PSNR values increasing as the network learns to
+                        better represent the 3D scene geometry and appearance.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Novel View Synthesis -->
+        <div class="section-header">
+            <h2>Novel View Synthesis</h2>
+            <p class="section-description">
+                Spherical rendering video of the Lego scene using provided test cameras. The video demonstrates the
+                network's ability to synthesize novel viewpoints that were not seen during training. The camera
+                follows a spherical path around the object, showing smooth transitions and consistent geometry
+                from all angles, validating the quality of the learned 3D representation.
+            </p>
+        </div>
+
+        <div style="display: flex; justify-content: center; margin: 30px 0;">
+            <div class="image-card" style="max-width: 1200px; width: 100%;">
+                <div class="image-container" style="background: #000; padding: 20px;">
+                    <img src="part2/novel_views.gif" alt="Novel View Synthesis Video"
+                        style="max-width: 100%; height: auto; cursor: pointer;" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Spherical Rendering Video</div>
+                    <div class="image-filename">novel_views.gif</div>
+                    <div class="image-description">
+                        Animated sequence showing novel view synthesis of the Lego scene. The camera rotates around
+                        the object in a spherical path, demonstrating the network's ability to render consistent
+                        and realistic views from arbitrary camera positions. This validates the quality of the
+                        learned Neural Radiance Field representation.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Part 2.6: Training with Your Own Data -->
+        <div class="section-header">
+            <h2>Part 2.6: Training with Your Own Data</h2>
+            <p class="section-description">
+                We trained the NeRF model on our own custom dataset. This section shows the results, modifications made
+                to the network architecture, hyperparameter adjustments, and training progress on the custom scene.
+            </p>
+        </div>
+
+        <!-- Code and Hyperparameter Changes -->
+        <div
+            style="background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border-radius: 15px; padding: 40px; margin: 40px 0; color: white;">
+            <h2 style="color: white; margin-bottom: 30px; font-size: 2rem; text-align: center;">Code and Hyperparameter
+                Changes</h2>
+            <div style="max-width: 1000px; margin: 0 auto; line-height: 1.8;">
+                <div style="background: rgba(255, 255, 255, 0.1); padding: 25px; border-radius: 10px; margin: 20px 0;">
+                    <h3 style="color: white; margin: 20px 0 15px 0; font-size: 1.3rem;">Network Architecture
+                        Modifications</h3>
+                    <p style="margin-bottom: 15px; font-size: 1rem;">
+                        To improve the model's capacity for our custom dataset, we added additional connection layers
+                        and
+                        more layers to the neural network. These modifications increase the network's ability to learn
+                        complex scene representations, though they also increase computational requirements.
+                    </p>
+
+                    <h3 style="color: white; margin: 20px 0 15px 0; font-size: 1.3rem;">Hyperparameter Adjustments</h3>
+                    <p style="margin-bottom: 0; font-size: 1rem;">
+                        Since our custom dataset has different scene characteristics compared to the Lego dataset, we
+                        adjusted the near and far rendering parameters to better match the scene's depth range. These
+                        parameters control where along each ray we sample points, so adjusting them is crucial when
+                        working with scenes of different scales.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Novel View Synthesis for Custom Data -->
+        <div class="section-header">
+            <h2>Novel View Synthesis - Custom Dataset</h2>
+            <p class="section-description">
+                Camera circling animation showing novel views synthesized from the custom dataset. The video
+                demonstrates
+                the model's ability to render the scene from viewpoints not seen during training.
+            </p>
+        </div>
+
+        <div style="display: flex; justify-content: center; margin: 30px 0;">
+            <div class="image-card" style="max-width: 1200px; width: 100%;">
+                <div class="image-container" style="background: #000; padding: 20px;">
+                    <img src="part0/custom_novel_views_1.gif" alt="Custom Novel View Synthesis"
+                        style="max-width: 100%; height: auto; cursor: pointer;" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Novel View Synthesis - Custom Dataset</div>
+                    <div class="image-filename">custom_novel_views_1.gif</div>
+                    <div class="image-description">
+                        Animated sequence showing novel view synthesis of the custom scene. The camera rotates around
+                        the object in a circular path, demonstrating the model's rendering capability on the custom
+                        dataset.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Training Loss Curve -->
+        <div class="section-header">
+            <h2>Training Loss Over Iterations</h2>
+            <p class="section-description">
+                Plot showing the training loss decreasing over iterations. This metric helps monitor the training
+                progress and identify potential issues such as overfitting or convergence problems.
+            </p>
+        </div>
+
+        <div style="display: flex; justify-content: center; margin: 30px 0;">
+            <div class="image-card" style="max-width: 1000px; width: 100%;">
+                <div class="image-container">
+                    <img src="part0/training_curves.png" alt="Training Loss Curve" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Training Loss Curve</div>
+                    <div class="image-filename">training_curves.png</div>
+                    <div class="image-description">
+                        Training loss curve showing how the loss decreases over training iterations. The curve helps
+                        understand the training dynamics and whether the model is learning effectively.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Intermediate Renders During Training -->
+        <div class="section-header">
+            <h2>Intermediate Renders During Training</h2>
+            <p class="section-description">
+                Visualization of the scene reconstruction at different stages of training. These intermediate renders
+                show how the model gradually learns to represent the scene, progressing from initial noise to more
+                recognizable shapes.
+            </p>
+        </div>
+
+        <div style="display: flex; justify-content: center; margin: 30px 0;">
+            <div class="image-card" style="max-width: 1200px; width: 100%;">
+                <div class="image-container">
+                    <img src="part0/training_progress.png" alt="Training Progress" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Training Progress Visualization</div>
+                    <div class="image-filename">training_progress.png</div>
+                    <div class="image-description">
+                        Side-by-side comparison of rendered images at different training iterations. Shows the
+                        progressive improvement in reconstruction quality, from initial blurry predictions to
+                        more defined shapes. Note that the final quality may be limited due to the challenging
+                        nature of the custom dataset.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Training Results -->
+        <div class="section-header">
+            <h2>Training Results</h2>
+            <p class="section-description">
+                Summary of the training results and model performance on the custom dataset.
+            </p>
+        </div>
+
+        <div
+            style="background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border-radius: 15px; padding: 40px; margin: 40px 0; color: white;">
+            <div style="max-width: 1000px; margin: 0 auto; line-height: 1.8;">
+                <div style="background: rgba(255, 255, 255, 0.1); padding: 25px; border-radius: 10px; margin: 20px 0;">
+                    <p style="margin-bottom: 0; font-size: 1rem;">
+                        The validation set PSNR is relatively low, and the model can only barely make out the outline
+                        of objects. This suggests that the custom dataset may be more challenging, or that further
+                        hyperparameter tuning and training iterations are needed to achieve better reconstruction
+                        quality.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin: 40px 0;">
+            <a href="../index.html"
+                style="display: inline-flex; align-items: center; padding: 15px 30px; background: linear-gradient(45deg, #667eea, #764ba2); color: white; text-decoration: none; border-radius: 25px; font-size: 16px; font-weight: 500; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);">
+                ← Back to Home
+            </a>
+        </div>
+
+        <footer>
+            <p>&copy; 2025 CS180 Project 4 - NeRF Construction</p>
+            <p>2D Neural Fields and 3D Neural Radiance Fields</p>
+        </footer>
+    </div>
+
+    <!-- Modal for image viewing -->
+    <div id="imageModal" class="modal" onclick="closeModal()">
+        <span class="close">&times;</span>
+        <img class="modal-content" id="modalImage">
+    </div>
+
+    <script>
+        function openModal(src) {
+            const modal = document.getElementById('imageModal');
+            const modalImg = document.getElementById('modalImage');
+            modal.style.display = 'block';
+            modalImg.src = src;
+        }
+
+        function closeModal() {
+            document.getElementById('imageModal').style.display = 'none';
+        }
+
+        // Close modal on ESC key
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape') {
+                closeModal();
+            }
+        });
+
+        // Close modal when clicking outside image
+        document.getElementById('imageModal').addEventListener('click', function (event) {
+            if (event.target === this) {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+
+</html>
