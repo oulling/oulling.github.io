@@ -1,0 +1,1504 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CS180 Project 5: Diffusion Models</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-link {
+            margin-bottom: 30px;
+        }
+
+        .back-link a {
+            display: inline-flex;
+            align-items: center;
+            padding: 10px 20px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .back-link a:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+            background: linear-gradient(45deg, #764ba2, #667eea);
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+            padding: 40px 0;
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 20px;
+        }
+
+        .description {
+            max-width: 800px;
+            margin: 0 auto;
+            font-size: 1rem;
+            opacity: 0.8;
+            line-height: 1.8;
+        }
+
+        .section-header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 40px 0 30px 0;
+            color: white;
+            text-align: center;
+        }
+
+        .section-header h2 {
+            color: white;
+            margin-bottom: 15px;
+            font-size: 1.8rem;
+        }
+
+        .section-description {
+            font-size: 1rem;
+            opacity: 0.9;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+            align-items: start;
+        }
+
+        .image-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .image-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .image-container {
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #f8f9fa;
+            min-height: 200px;
+        }
+
+        .image-container img {
+            width: 100%;
+            height: auto;
+            max-height: 400px;
+            object-fit: contain;
+            transition: transform 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        .image-card:hover .image-container img {
+            transform: scale(1.05);
+        }
+
+        .image-info {
+            padding: 20px;
+        }
+
+        .image-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .image-filename {
+            font-size: 0.85rem;
+            color: #666;
+            font-family: 'Courier New', monospace;
+            margin-bottom: 10px;
+        }
+
+        .image-description {
+            font-size: 0.9rem;
+            color: #555;
+            line-height: 1.5;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            animation: fadeIn 0.3s;
+        }
+
+        .modal-content {
+            margin: auto;
+            display: block;
+            width: 90%;
+            max-width: 1200px;
+            max-height: 90vh;
+            object-fit: contain;
+            animation: zoomIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes zoomIn {
+            from {
+                transform: scale(0.5);
+            }
+
+            to {
+                transform: scale(1);
+            }
+        }
+
+        .close {
+            position: absolute;
+            top: 30px;
+            right: 45px;
+            color: #f1f1f1;
+            font-size: 40px;
+            font-weight: bold;
+            transition: 0.3s;
+            cursor: pointer;
+            z-index: 1001;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: #bbb;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px 0;
+            color: white;
+            margin-top: 60px;
+        }
+
+        footer p {
+            margin: 10px 0;
+            opacity: 0.8;
+        }
+
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .side-by-side {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .progression-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 30px 0;
+        }
+
+        .compact-gallery {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 15px;
+            margin-top: 30px;
+            align-items: start;
+        }
+
+        .compact-gallery-7 {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+            margin-top: 30px;
+            align-items: start;
+        }
+
+        .compact-gallery-6 {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 10px;
+            margin-top: 30px;
+            align-items: start;
+        }
+
+        .compact-gallery-5 {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            margin-top: 30px;
+            align-items: start;
+        }
+
+        .compact-gallery-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 30px;
+            align-items: start;
+        }
+
+        .compact-gallery-6 .image-container,
+        .compact-gallery-5 .image-container,
+        .compact-gallery-3 .image-container {
+            min-height: 150px;
+        }
+
+        .compact-gallery-6 .image-container img,
+        .compact-gallery-5 .image-container img,
+        .compact-gallery-3 .image-container img {
+            max-height: 200px;
+        }
+
+        .compact-gallery-6 .image-info,
+        .compact-gallery-5 .image-info,
+        .compact-gallery-3 .image-info {
+            padding: 10px;
+        }
+
+        .compact-gallery-6 .image-title,
+        .compact-gallery-5 .image-title,
+        .compact-gallery-3 .image-title {
+            font-size: 0.9rem;
+        }
+
+        .compact-gallery .image-container,
+        .compact-gallery-7 .image-container {
+            min-height: 150px;
+        }
+
+        .compact-gallery .image-container img,
+        .compact-gallery-7 .image-container img {
+            max-height: 200px;
+        }
+
+        .compact-gallery .image-info,
+        .compact-gallery-7 .image-info {
+            padding: 10px;
+        }
+
+        .compact-gallery .image-title,
+        .compact-gallery-7 .image-title {
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .side-by-side {
+                grid-template-columns: 1fr;
+            }
+
+            .comparison-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .compact-gallery {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .compact-gallery-7,
+            .compact-gallery-6,
+            .compact-gallery-5,
+            .compact-gallery-3 {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="back-link">
+            <a href="../index.html">← Back to Home</a>
+        </div>
+
+        <header>
+            <h1>CS180 Project 5</h1>
+            <p class="subtitle">Diffusion Models</p>
+            <p class="description">
+                This project explores DeepFloyd IF diffusion models for text-to-image generation, image editing, and
+                creative applications. We implement sampling loops, denoising processes, and advanced techniques like
+                classifier-free guidance, inpainting, visual anagrams, and hybrid images.
+            </p>
+        </header>
+
+        <!-- Part 0: Setup -->
+        <div class="section-header">
+            <h2>Part 0: Setup</h2>
+            <p class="section-description">
+                Gaining access to DeepFloyd IF diffusion model and generating prompt embeddings for text-to-image
+                generation.
+            </p>
+        </div>
+
+        <div
+            style="background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border-radius: 15px; padding: 30px; margin: 30px 0; color: white;">
+            <h3 style="color: white; margin-bottom: 20px; font-size: 1.3rem;">Experiment Details</h3>
+            <p style="margin-bottom: 15px; line-height: 1.8; font-size: 1rem;">
+                <strong>Random Seed:</strong> 42 (used consistently across all subsequent parts)
+            </p>
+            <p style="margin-bottom: 20px; line-height: 1.8; font-size: 1rem;">
+                <strong>Text Prompts:</strong>
+            </p>
+            <ol style="margin-left: 20px; margin-bottom: 20px; line-height: 1.8; font-size: 1rem;">
+                <li style="margin-bottom: 10px;">'An image that can be interpreted both as a sleeping cat and as a
+                    croissant, with smooth curves and soft textures that visually blend the two shapes.'</li>
+                <li style="margin-bottom: 10px;">'A surreal hybrid image that looks simultaneously like a violin and a
+                    human face, merging wooden textures with facial features in a seamless artistic composition.'</li>
+                <li style="margin-bottom: 10px;">'A futuristic city built entirely out of crystal structures, glowing
+                    softly under a purple sunset sky, highly detailed and dreamlike.'</li>
+            </ol>
+            <p style="margin-bottom: 15px; line-height: 1.8; font-size: 1rem;">
+                <strong>Quality Analysis:</strong> The generated images demonstrate strong alignment with their
+                respective text prompts. The diffusion model successfully captures the creative and surreal elements
+                described in each prompt. Notably, images generated with 100 inference steps show significantly more
+                detail and refinement compared to those with 20 steps. The additional denoising iterations allow for
+                better texture rendering, more precise shape definition, and enhanced visual coherence, particularly
+                evident in the intricate details of the crystal city structures and the subtle blending of hybrid forms
+                in the cat-croissant and violin-face compositions.
+            </p>
+        </div>
+
+        <div class="compact-gallery-6">
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="1.0/cat.png" alt="Cat/Croissant (20 steps)" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Cat/Croissant (20 steps)</div>
+                </div>
+            </div>
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="1.0/cat_100.png" alt="Cat/Croissant (100 steps)" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Cat/Croissant (100 steps)</div>
+                </div>
+            </div>
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="1.0/violin.png" alt="Violin/Face (20 steps)" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Violin/Face (20 steps)</div>
+                </div>
+            </div>
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="1.0/violin_100.png" alt="Violin/Face (100 steps)" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Violin/Face (100 steps)</div>
+                </div>
+            </div>
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="1.0/city.png" alt="Crystal City (20 steps)" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Crystal City (20 steps)</div>
+                </div>
+            </div>
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="1.0/city_100.png" alt="Crystal City (100 steps)" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Crystal City (100 steps)</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Part 1: Sampling Loops -->
+        <div class="section-header">
+            <h2>Part 1: Sampling Loops</h2>
+        </div>
+
+        <!-- 1.1 Forward Process -->
+        <div class="section-header" style="margin: 30px 0 20px 0;">
+            <h3 style="color: white; margin-bottom: 15px; font-size: 1.4rem;">1.1 Implementing the Forward Process</h3>
+            <p class="section-description">Adding noise to images at different timesteps.</p>
+        </div>
+
+        <div class="gallery">
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="1.1/test.png" alt="Original Campanile" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Original Campanile</div>
+                </div>
+            </div>
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="1.1/t=250.png" alt="Noisy at t=250" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Noisy Campanile at t=250</div>
+                </div>
+            </div>
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="1.1/t=500.png" alt="Noisy at t=500" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Noisy Campanile at t=500</div>
+                </div>
+            </div>
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="1.1/t=750.png" alt="Noisy at t=750" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Noisy Campanile at t=750</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 1.2 Classical Denoising -->
+        <div class="section-header" style="margin: 30px 0 20px 0;">
+            <h3 style="color: white; margin-bottom: 15px; font-size: 1.4rem;">1.2 Classical Denoising</h3>
+            <p class="section-description">Attempting to denoise using Gaussian blur filtering.</p>
+        </div>
+
+        <div class="compact-gallery-3">
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="1.2/blur_250.png" alt="Gaussian Blur at t=250" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Gaussian Blur Denoising at t=250</div>
+                </div>
+            </div>
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="1.2/blur_500.png" alt="Gaussian Blur at t=500" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Gaussian Blur Denoising at t=500</div>
+                </div>
+            </div>
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="1.2/blur_750.png" alt="Gaussian Blur at t=750" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Gaussian Blur Denoising at t=750</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 1.3 One-Step Denoising -->
+        <div class="section-header" style="margin: 30px 0 20px 0;">
+            <h3 style="color: white; margin-bottom: 15px; font-size: 1.4rem;">1.3 One-Step Denoising</h3>
+            <p class="section-description">Using pretrained diffusion model for single-step denoising.</p>
+        </div>
+
+        <div class="gallery">
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="1.3/denoise_250.png" alt="One-Step Denoised at t=250" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">One-Step Denoised Campanile at t=250</div>
+                </div>
+            </div>
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="1.3/denoise_500.png" alt="One-Step Denoised at t=500" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">One-Step Denoised Campanile at t=500</div>
+                </div>
+            </div>
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="1.3/denoise_750.png" alt="One-Step Denoised at t=750" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">One-Step Denoised Campanile at t=750</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 1.4 Iterative Denoising -->
+        <div class="section-header" style="margin: 30px 0 20px 0;">
+            <h3 style="color: white; margin-bottom: 15px; font-size: 1.4rem;">1.4 Iterative Denoising</h3>
+            <p class="section-description">Iterative denoising process showing gradual improvement.</p>
+        </div>
+
+        <div class="progression-grid">
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="1.4/step10.png" alt="Step 10" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Noisy Campanile at t=90</div>
+                </div>
+            </div>
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="1.4/step15.png" alt="Step 15" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Noisy Campanile at t=240</div>
+                </div>
+            </div>
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="1.4/step20.png" alt="Step 20" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Noisy Campanile at t=390</div>
+                </div>
+            </div>
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="1.4/step25.png" alt="Step 25" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Noisy Campanile at t=540</div>
+                </div>
+            </div>
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="1.4/step30.png" alt="Step 30" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Noisy Campanile at t=690</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="comparison-grid" style="margin-top: 30px;">
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="1.1/test.png" alt="Original" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Original Campanile</div>
+                </div>
+            </div>
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="1.4/final_iter.png" alt="Iteratively Denoised" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Iteratively Denoised Campanile</div>
+                </div>
+            </div>
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="1.4/one_step.png" alt="One-Step Denoised" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">One-Step Denoised Campanile</div>
+                </div>
+            </div>
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="1.4/gauss.png" alt="Gaussian Blurred" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Gaussian Blurred Campanile</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 1.5 Diffusion Model Sampling -->
+        <div class="section-header" style="margin: 30px 0 20px 0;">
+            <h3 style="color: white; margin-bottom: 15px; font-size: 1.4rem;">1.5 Diffusion Model Sampling</h3>
+            <p class="section-description">Generating images from pure noise using the prompt "a high quality photo".
+            </p>
+        </div>
+
+        <div class="compact-gallery">
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="1.5/sam1.png" alt="Sample 1" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Sample 1</div>
+                </div>
+            </div>
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="1.5/sam2.png" alt="Sample 2" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Sample 2</div>
+                </div>
+            </div>
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="1.5/sam3.png" alt="Sample 3" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Sample 3</div>
+                </div>
+            </div>
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="1.5/sam4.png" alt="Sample 4" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Sample 4</div>
+                </div>
+            </div>
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="1.5/sam5.png" alt="Sample 5" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Sample 5</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 1.6 Classifier-Free Guidance (CFG) -->
+        <div class="section-header" style="margin: 30px 0 20px 0;">
+            <h3 style="color: white; margin-bottom: 15px; font-size: 1.4rem;">1.6 Classifier-Free Guidance (CFG)</h3>
+            <p class="section-description">Improved image quality using CFG with scale 7.5.</p>
+        </div>
+
+        <div class="compact-gallery">
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="1.6/sam6.png" alt="Sample 6 with CFG" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Sample 6 with CFG</div>
+                </div>
+            </div>
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="1.6/sam7.png" alt="Sample 7 with CFG" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Sample 7 with CFG</div>
+                </div>
+            </div>
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="1.6/sam8.png" alt="Sample 8 with CFG" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Sample 8 with CFG</div>
+                </div>
+            </div>
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="1.6/sam9.png" alt="Sample 9 with CFG" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Sample 9 with CFG</div>
+                </div>
+            </div>
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="1.6/sam10.png" alt="Sample 10 with CFG" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Sample 10 with CFG</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 1.7 Image-to-image Translation -->
+        <div class="section-header" style="margin: 30px 0 20px 0;">
+            <h3 style="color: white; margin-bottom: 15px; font-size: 1.4rem;">1.7 Image-to-image Translation</h3>
+            <p class="section-description">SDEdit algorithm: projecting images onto the natural image manifold.</p>
+        </div>
+
+        <!-- 1.7.0 Basic SDEdit -->
+        <div style="margin: 20px 0;">
+            <h4 style="color: white; margin: 20px 0 15px 0; font-size: 1.2rem; text-align: center;">Campanile Edits</h4>
+            <div class="compact-gallery-7">
+                <div class="image-card">
+                    <div class="image-container">
+                        <img src="1.7/1.7.0/campanile_1.png" alt="SDEdit i_start=1" onclick="openModal(this.src)">
+                    </div>
+                    <div class="image-info">
+                        <div class="image-title">SDEdit with i_start=1</div>
+                    </div>
+                </div>
+                <div class="image-card">
+                    <div class="image-container">
+                        <img src="1.7/1.7.0/campanile_3.png" alt="SDEdit i_start=3" onclick="openModal(this.src)">
+                    </div>
+                    <div class="image-info">
+                        <div class="image-title">SDEdit with i_start=3</div>
+                    </div>
+                </div>
+                <div class="image-card">
+                    <div class="image-container">
+                        <img src="1.7/1.7.0/campanile_5.png" alt="SDEdit i_start=5" onclick="openModal(this.src)">
+                    </div>
+                    <div class="image-info">
+                        <div class="image-title">SDEdit with i_start=5</div>
+                    </div>
+                </div>
+                <div class="image-card">
+                    <div class="image-container">
+                        <img src="1.7/1.7.0/campanile_7.png" alt="SDEdit i_start=7" onclick="openModal(this.src)">
+                    </div>
+                    <div class="image-info">
+                        <div class="image-title">SDEdit with i_start=7</div>
+                    </div>
+                </div>
+                <div class="image-card">
+                    <div class="image-container">
+                        <img src="1.7/1.7.0/campanile_10.png" alt="SDEdit i_start=10" onclick="openModal(this.src)">
+                    </div>
+                    <div class="image-info">
+                        <div class="image-title">SDEdit with i_start=10</div>
+                    </div>
+                </div>
+                <div class="image-card">
+                    <div class="image-container">
+                        <img src="1.7/1.7.0/campanile_20.png" alt="SDEdit i_start=20" onclick="openModal(this.src)">
+                    </div>
+                    <div class="image-info">
+                        <div class="image-title">SDEdit with i_start=20</div>
+                    </div>
+                </div>
+                <div class="image-card">
+                    <div class="image-container">
+                        <img src="1.7/1.7.0/campanile.png" alt="Original Campanile" onclick="openModal(this.src)">
+                    </div>
+                    <div class="image-info">
+                        <div class="image-title">Original Campanile</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div style="margin: 20px 0;">
+            <h4 style="color: white; margin: 20px 0 15px 0; font-size: 1.2rem; text-align: center;">Cat Edits</h4>
+            <div class="compact-gallery-7">
+                <div class="image-card">
+                    <div class="image-container">
+                        <img src="1.7/1.7.0/cat_1.png" alt="Cat i_start=1" onclick="openModal(this.src)">
+                    </div>
+                    <div class="image-info">
+                        <div class="image-title">Cat at i_start=1</div>
+                    </div>
+                </div>
+                <div class="image-card">
+                    <div class="image-container">
+                        <img src="1.7/1.7.0/cat_3.png" alt="Cat i_start=3" onclick="openModal(this.src)">
+                    </div>
+                    <div class="image-info">
+                        <div class="image-title">Cat at i_start=3</div>
+                    </div>
+                </div>
+                <div class="image-card">
+                    <div class="image-container">
+                        <img src="1.7/1.7.0/cat_5.png" alt="Cat i_start=5" onclick="openModal(this.src)">
+                    </div>
+                    <div class="image-info">
+                        <div class="image-title">Cat at i_start=5</div>
+                    </div>
+                </div>
+                <div class="image-card">
+                    <div class="image-container">
+                        <img src="1.7/1.7.0/cat_7.png" alt="Cat i_start=7" onclick="openModal(this.src)">
+                    </div>
+                    <div class="image-info">
+                        <div class="image-title">Cat at i_start=7</div>
+                    </div>
+                </div>
+                <div class="image-card">
+                    <div class="image-container">
+                        <img src="1.7/1.7.0/cat_10.png" alt="Cat i_start=10" onclick="openModal(this.src)">
+                    </div>
+                    <div class="image-info">
+                        <div class="image-title">Cat at i_start=10</div>
+                    </div>
+                </div>
+                <div class="image-card">
+                    <div class="image-container">
+                        <img src="1.7/1.7.0/cat_20.png" alt="Cat i_start=20" onclick="openModal(this.src)">
+                    </div>
+                    <div class="image-info">
+                        <div class="image-title">Cat at i_start=20</div>
+                    </div>
+                </div>
+                <div class="image-card">
+                    <div class="image-container">
+                        <img src="1.7/1.7.0/cat.png" alt="Original Cat" onclick="openModal(this.src)">
+                    </div>
+                    <div class="image-info">
+                        <div class="image-title">Original Cat</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div style="margin: 20px 0;">
+            <h4 style="color: white; margin: 20px 0 15px 0; font-size: 1.2rem; text-align: center;">City Edits</h4>
+            <div class="compact-gallery-7">
+                <div class="image-card">
+                    <div class="image-container">
+                        <img src="1.7/1.7.0/city_1.png" alt="City i_start=1" onclick="openModal(this.src)">
+                    </div>
+                    <div class="image-info">
+                        <div class="image-title">City at i_start=1</div>
+                    </div>
+                </div>
+                <div class="image-card">
+                    <div class="image-container">
+                        <img src="1.7/1.7.0/city_3.png" alt="City i_start=3" onclick="openModal(this.src)">
+                    </div>
+                    <div class="image-info">
+                        <div class="image-title">City at i_start=3</div>
+                    </div>
+                </div>
+                <div class="image-card">
+                    <div class="image-container">
+                        <img src="1.7/1.7.0/city_5.png" alt="City i_start=5" onclick="openModal(this.src)">
+                    </div>
+                    <div class="image-info">
+                        <div class="image-title">City at i_start=5</div>
+                    </div>
+                </div>
+                <div class="image-card">
+                    <div class="image-container">
+                        <img src="1.7/1.7.0/city_7.png" alt="City i_start=7" onclick="openModal(this.src)">
+                    </div>
+                    <div class="image-info">
+                        <div class="image-title">City at i_start=7</div>
+                    </div>
+                </div>
+                <div class="image-card">
+                    <div class="image-container">
+                        <img src="1.7/1.7.0/city_10.png" alt="City i_start=10" onclick="openModal(this.src)">
+                    </div>
+                    <div class="image-info">
+                        <div class="image-title">City at i_start=10</div>
+                    </div>
+                </div>
+                <div class="image-card">
+                    <div class="image-container">
+                        <img src="1.7/1.7.0/city_20.png" alt="City i_start=20" onclick="openModal(this.src)">
+                    </div>
+                    <div class="image-info">
+                        <div class="image-title">City at i_start=20</div>
+                    </div>
+                </div>
+                <div class="image-card">
+                    <div class="image-container">
+                        <img src="1.7/1.7.0/city.png" alt="Original City" onclick="openModal(this.src)">
+                    </div>
+                    <div class="image-info">
+                        <div class="image-title">Original City</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 1.7.1 Editing Hand-Drawn and Web Images -->
+        <div style="margin: 40px 0;">
+            <h4 style="color: white; margin: 20px 0 15px 0; font-size: 1.2rem; text-align: center;">1.7.1 Editing
+                Hand-Drawn and Web Images</h4>
+            <div style="margin: 20px 0;">
+                <h5 style="color: white; margin: 15px 0 10px 0; font-size: 1.1rem; text-align: center;">Web Image</h5>
+                <div class="compact-gallery-7">
+                    <div class="image-card">
+                        <div class="image-container">
+                            <img src="1.7/1.7.1/1.png" alt="Web i_start=1" onclick="openModal(this.src)">
+                        </div>
+                        <div class="image-info">
+                            <div class="image-title">Bear at i_start=1</div>
+                        </div>
+                    </div>
+                    <div class="image-card">
+                        <div class="image-container">
+                            <img src="1.7/1.7.1/3.png" alt="Web i_start=3" onclick="openModal(this.src)">
+                        </div>
+                        <div class="image-info">
+                            <div class="image-title">Bear at i_start=3</div>
+                        </div>
+                    </div>
+                    <div class="image-card">
+                        <div class="image-container">
+                            <img src="1.7/1.7.1/5.png" alt="Web i_start=5" onclick="openModal(this.src)">
+                        </div>
+                        <div class="image-info">
+                            <div class="image-title">Bear at i_start=5</div>
+                        </div>
+                    </div>
+                    <div class="image-card">
+                        <div class="image-container">
+                            <img src="1.7/1.7.1/7.png" alt="Web i_start=7" onclick="openModal(this.src)">
+                        </div>
+                        <div class="image-info">
+                            <div class="image-title">Bear at i_start=7</div>
+                        </div>
+                    </div>
+                    <div class="image-card">
+                        <div class="image-container">
+                            <img src="1.7/1.7.1/10.png" alt="Web i_start=10" onclick="openModal(this.src)">
+                        </div>
+                        <div class="image-info">
+                            <div class="image-title">Bear at i_start=10</div>
+                        </div>
+                    </div>
+                    <div class="image-card">
+                        <div class="image-container">
+                            <img src="1.7/1.7.1/20.png" alt="Web i_start=20" onclick="openModal(this.src)">
+                        </div>
+                        <div class="image-info">
+                            <div class="image-title">Bear at i_start=20</div>
+                        </div>
+                    </div>
+                    <div class="image-card">
+                        <div class="image-container">
+                            <img src="1.7/1.7.1/origin.png" alt="Original Web" onclick="openModal(this.src)">
+                        </div>
+                        <div class="image-info">
+                            <div class="image-title">Original Bear</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin: 30px 0;">
+                <h5 style="color: white; margin: 15px 0 10px 0; font-size: 1.1rem; text-align: center;">Hand-Drawn Image
+                    1</h5>
+                <div class="compact-gallery-7">
+                    <div class="image-card">
+                        <div class="image-container">
+                            <img src="1.7/1.7.1/hand1_1.png" alt="Hand1 i_start=1" onclick="openModal(this.src)">
+                        </div>
+                        <div class="image-info">
+                            <div class="image-title">House at i_start=1</div>
+                        </div>
+                    </div>
+                    <div class="image-card">
+                        <div class="image-container">
+                            <img src="1.7/1.7.1/hand1_3.png" alt="Hand1 i_start=3" onclick="openModal(this.src)">
+                        </div>
+                        <div class="image-info">
+                            <div class="image-title">House at i_start=3</div>
+                        </div>
+                    </div>
+                    <div class="image-card">
+                        <div class="image-container">
+                            <img src="1.7/1.7.1/hand1_5.png" alt="Hand1 i_start=5" onclick="openModal(this.src)">
+                        </div>
+                        <div class="image-info">
+                            <div class="image-title">House at i_start=5</div>
+                        </div>
+                    </div>
+                    <div class="image-card">
+                        <div class="image-container">
+                            <img src="1.7/1.7.1/hand1_7.png" alt="Hand1 i_start=7" onclick="openModal(this.src)">
+                        </div>
+                        <div class="image-info">
+                            <div class="image-title">House at i_start=7</div>
+                        </div>
+                    </div>
+                    <div class="image-card">
+                        <div class="image-container">
+                            <img src="1.7/1.7.1/hand1_10.png" alt="Hand1 i_start=10" onclick="openModal(this.src)">
+                        </div>
+                        <div class="image-info">
+                            <div class="image-title">House at i_start=10</div>
+                        </div>
+                    </div>
+                    <div class="image-card">
+                        <div class="image-container">
+                            <img src="1.7/1.7.1/hand1_20.png" alt="Hand1 i_start=20" onclick="openModal(this.src)">
+                        </div>
+                        <div class="image-info">
+                            <div class="image-title">House at i_start=20</div>
+                        </div>
+                    </div>
+                    <div class="image-card">
+                        <div class="image-container">
+                            <img src="1.7/1.7.1/handorg1.png" alt="Original Hand1" onclick="openModal(this.src)">
+                        </div>
+                        <div class="image-info">
+                            <div class="image-title">Original House Sketch</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin: 30px 0;">
+                <h5 style="color: white; margin: 15px 0 10px 0; font-size: 1.1rem; text-align: center;">Hand-Drawn Image
+                    2</h5>
+                <div class="compact-gallery-7">
+                    <div class="image-card">
+                        <div class="image-container">
+                            <img src="1.7/1.7.1/hand2_1.png" alt="Hand2 i_start=1" onclick="openModal(this.src)">
+                        </div>
+                        <div class="image-info">
+                            <div class="image-title">Hand2 at i_start=1</div>
+                        </div>
+                    </div>
+                    <div class="image-card">
+                        <div class="image-container">
+                            <img src="1.7/1.7.1/hand2_3.png" alt="Hand2 i_start=3" onclick="openModal(this.src)">
+                        </div>
+                        <div class="image-info">
+                            <div class="image-title">Hand2 at i_start=3</div>
+                        </div>
+                    </div>
+                    <div class="image-card">
+                        <div class="image-container">
+                            <img src="1.7/1.7.1/hand2_5.png" alt="Hand2 i_start=5" onclick="openModal(this.src)">
+                        </div>
+                        <div class="image-info">
+                            <div class="image-title">Hand2 at i_start=5</div>
+                        </div>
+                    </div>
+                    <div class="image-card">
+                        <div class="image-container">
+                            <img src="1.7/1.7.1/hand2_7.png" alt="Hand2 i_start=7" onclick="openModal(this.src)">
+                        </div>
+                        <div class="image-info">
+                            <div class="image-title">Hand2 at i_start=7</div>
+                        </div>
+                    </div>
+                    <div class="image-card">
+                        <div class="image-container">
+                            <img src="1.7/1.7.1/hand2_10.png" alt="Hand2 i_start=10" onclick="openModal(this.src)">
+                        </div>
+                        <div class="image-info">
+                            <div class="image-title">Hand2 at i_start=10</div>
+                        </div>
+                    </div>
+                    <div class="image-card">
+                        <div class="image-container">
+                            <img src="1.7/1.7.1/hand2_20.png" alt="Hand2 i_start=20" onclick="openModal(this.src)">
+                        </div>
+                        <div class="image-info">
+                            <div class="image-title">Hand2 at i_start=20</div>
+                        </div>
+                    </div>
+                    <div class="image-card">
+                        <div class="image-container">
+                            <img src="1.7/1.7.1/handorg2.png" alt="Original Hand2" onclick="openModal(this.src)">
+                        </div>
+                        <div class="image-info">
+                            <div class="image-title">Original Hand2</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 1.7.2 Inpainting -->
+        <div style="margin: 40px 0;">
+            <h4 style="color: white; margin: 20px 0 15px 0; font-size: 1.2rem; text-align: center;">1.7.2 Inpainting
+            </h4>
+            <div style="margin: 20px 0;">
+                <h5 style="color: white; margin: 15px 0 10px 0; font-size: 1.1rem; text-align: center;">Campanile
+                    Inpainting</h5>
+                <div class="gallery">
+                    <div class="image-card">
+                        <div class="image-container">
+                            <img src="1.7/1.7.2/campanile.png" alt="Campanile" onclick="openModal(this.src)">
+                        </div>
+                        <div class="image-info">
+                            <div class="image-title">Campanile Inpainted</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div style="margin: 30px 0;">
+                <h5 style="color: white; margin: 15px 0 10px 0; font-size: 1.1rem; text-align: center;">City Inpainting
+                </h5>
+                <div class="gallery">
+                    <div class="image-card">
+                        <div class="image-container">
+                            <img src="1.7/1.7.2/city.png" alt="City Original" onclick="openModal(this.src)">
+                        </div>
+                        <div class="image-info">
+                            <div class="image-title">City</div>
+                        </div>
+                    </div>
+                    <div class="image-card">
+                        <div class="image-container">
+                            <img src="1.7/1.7.2/city_mask.png" alt="City Mask" onclick="openModal(this.src)">
+                        </div>
+                        <div class="image-info">
+                            <div class="image-title">Mask</div>
+                        </div>
+                    </div>
+                    <div class="image-card">
+                        <div class="image-container">
+                            <img src="1.7/1.7.2/city_replaced.png" alt="City Replaced" onclick="openModal(this.src)">
+                        </div>
+                        <div class="image-info">
+                            <div class="image-title">City Inpainted</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div style="margin: 30px 0;">
+                <h5 style="color: white; margin: 15px 0 10px 0; font-size: 1.1rem; text-align: center;">Violin
+                    Inpainting</h5>
+                <div class="gallery">
+                    <div class="image-card">
+                        <div class="image-container">
+                            <img src="1.7/1.7.2/violin.png" alt="Violin Original" onclick="openModal(this.src)">
+                        </div>
+                        <div class="image-info">
+                            <div class="image-title">Violin</div>
+                        </div>
+                    </div>
+                    <div class="image-card">
+                        <div class="image-container">
+                            <img src="1.7/1.7.2/violin_mask.png" alt="Violin Mask" onclick="openModal(this.src)">
+                        </div>
+                        <div class="image-info">
+                            <div class="image-title">Mask</div>
+                        </div>
+                    </div>
+                    <div class="image-card">
+                        <div class="image-container">
+                            <img src="1.7/1.7.2/violin_replaced.png" alt="Violin Replaced"
+                                onclick="openModal(this.src)">
+                        </div>
+                        <div class="image-info">
+                            <div class="image-title">Violin Inpainted</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 1.7.3 Text-Conditional Image-to-image Translation -->
+        <div style="margin: 40px 0;">
+            <h4 style="color: white; margin: 20px 0 15px 0; font-size: 1.2rem; text-align: center;">1.7.3
+                Text-Conditional Image-to-image Translation</h4>
+            <div style="margin: 20px 0;">
+                <h5 style="color: white; margin: 15px 0 10px 0; font-size: 1.1rem; text-align: center;">Campanile Edits
+                </h5>
+                <div class="compact-gallery-6">
+                    <div class="image-card">
+                        <div class="image-container">
+                            <img src="1.7/1.7.3/campanile_1.png" alt="Campanile at noise level 1"
+                                onclick="openModal(this.src)">
+                        </div>
+                        <div class="image-info">
+                            <div class="image-title">Campanile at noise level 1</div>
+                        </div>
+                    </div>
+                    <div class="image-card">
+                        <div class="image-container">
+                            <img src="1.7/1.7.3/campanile_3.png" alt="Campanile at noise level 3"
+                                onclick="openModal(this.src)">
+                        </div>
+                        <div class="image-info">
+                            <div class="image-title">Campanile at noise level 3</div>
+                        </div>
+                    </div>
+                    <div class="image-card">
+                        <div class="image-container">
+                            <img src="1.7/1.7.3/campanile_5.png" alt="Campanile at noise level 5"
+                                onclick="openModal(this.src)">
+                        </div>
+                        <div class="image-info">
+                            <div class="image-title">Campanile at noise level 5</div>
+                        </div>
+                    </div>
+                    <div class="image-card">
+                        <div class="image-container">
+                            <img src="1.7/1.7.3/campanile_7.png" alt="Campanile at noise level 7"
+                                onclick="openModal(this.src)">
+                        </div>
+                        <div class="image-info">
+                            <div class="image-title">Campanile at noise level 7</div>
+                        </div>
+                    </div>
+                    <div class="image-card">
+                        <div class="image-container">
+                            <img src="1.7/1.7.3/campanile_10.png" alt="Campanile at noise level 10"
+                                onclick="openModal(this.src)">
+                        </div>
+                        <div class="image-info">
+                            <div class="image-title">Campanile at noise level 10</div>
+                        </div>
+                    </div>
+                    <div class="image-card">
+                        <div class="image-container">
+                            <img src="1.7/1.7.3/campanile_20.png" alt="Campanile at noise level 20"
+                                onclick="openModal(this.src)">
+                        </div>
+                        <div class="image-info">
+                            <div class="image-title">Campanile at noise level 20</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div style="margin: 30px 0;">
+                <h5 style="color: white; margin: 15px 0 10px 0; font-size: 1.1rem; text-align: center;">City Edits</h5>
+                <div class="compact-gallery-6">
+                    <div class="image-card">
+                        <div class="image-container">
+                            <img src="1.7/1.7.3/city_1.png" alt="City at noise level 1" onclick="openModal(this.src)">
+                        </div>
+                        <div class="image-info">
+                            <div class="image-title">City at noise level 1</div>
+                        </div>
+                    </div>
+                    <div class="image-card">
+                        <div class="image-container">
+                            <img src="1.7/1.7.3/city_3.png" alt="City at noise level 3" onclick="openModal(this.src)">
+                        </div>
+                        <div class="image-info">
+                            <div class="image-title">City at noise level 3</div>
+                        </div>
+                    </div>
+                    <div class="image-card">
+                        <div class="image-container">
+                            <img src="1.7/1.7.3/city_5.png" alt="City at noise level 5" onclick="openModal(this.src)">
+                        </div>
+                        <div class="image-info">
+                            <div class="image-title">City at noise level 5</div>
+                        </div>
+                    </div>
+                    <div class="image-card">
+                        <div class="image-container">
+                            <img src="1.7/1.7.3/city_7.png" alt="City at noise level 7" onclick="openModal(this.src)">
+                        </div>
+                        <div class="image-info">
+                            <div class="image-title">City at noise level 7</div>
+                        </div>
+                    </div>
+                    <div class="image-card">
+                        <div class="image-container">
+                            <img src="1.7/1.7.3/city_10.png" alt="City at noise level 10" onclick="openModal(this.src)">
+                        </div>
+                        <div class="image-info">
+                            <div class="image-title">City at noise level 10</div>
+                        </div>
+                    </div>
+                    <div class="image-card">
+                        <div class="image-container">
+                            <img src="1.7/1.7.3/city_20.png" alt="City at noise level 20" onclick="openModal(this.src)">
+                        </div>
+                        <div class="image-info">
+                            <div class="image-title">City at noise level 20</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div style="margin: 30px 0;">
+                <h5 style="color: white; margin: 15px 0 10px 0; font-size: 1.1rem; text-align: center;">Violin Edits
+                </h5>
+                <div class="compact-gallery-6">
+                    <div class="image-card">
+                        <div class="image-container">
+                            <img src="1.7/1.7.3/violin_1.png" alt="Violin at noise level 1"
+                                onclick="openModal(this.src)">
+                        </div>
+                        <div class="image-info">
+                            <div class="image-title">Violin at noise level 1</div>
+                        </div>
+                    </div>
+                    <div class="image-card">
+                        <div class="image-container">
+                            <img src="1.7/1.7.3/violin_3.png" alt="Violin at noise level 3"
+                                onclick="openModal(this.src)">
+                        </div>
+                        <div class="image-info">
+                            <div class="image-title">Violin at noise level 3</div>
+                        </div>
+                    </div>
+                    <div class="image-card">
+                        <div class="image-container">
+                            <img src="1.7/1.7.3/violin_5.png" alt="Violin at noise level 5"
+                                onclick="openModal(this.src)">
+                        </div>
+                        <div class="image-info">
+                            <div class="image-title">Violin at noise level 5</div>
+                        </div>
+                    </div>
+                    <div class="image-card">
+                        <div class="image-container">
+                            <img src="1.7/1.7.3/violin_7.png" alt="Violin at noise level 7"
+                                onclick="openModal(this.src)">
+                        </div>
+                        <div class="image-info">
+                            <div class="image-title">Violin at noise level 7</div>
+                        </div>
+                    </div>
+                    <div class="image-card">
+                        <div class="image-container">
+                            <img src="1.7/1.7.3/violin_10.png" alt="Violin at noise level 10"
+                                onclick="openModal(this.src)">
+                        </div>
+                        <div class="image-info">
+                            <div class="image-title">Violin at noise level 10</div>
+                        </div>
+                    </div>
+                    <div class="image-card">
+                        <div class="image-container">
+                            <img src="1.7/1.7.3/violin_20.png" alt="Violin at noise level 20"
+                                onclick="openModal(this.src)">
+                        </div>
+                        <div class="image-info">
+                            <div class="image-title">Violin at noise level 20</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 1.8 Visual Anagrams -->
+        <div class="section-header" style="margin: 30px 0 20px 0;">
+            <h3 style="color: white; margin-bottom: 15px; font-size: 1.4rem;">1.8 Visual Anagrams</h3>
+            <p class="section-description">Creating optical illusions that change appearance when flipped upside down.
+            </p>
+        </div>
+
+        <div class="side-by-side">
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="1.8/Anagrams.png" alt="An Oil Painting of an Old Man" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">An Oil Painting of an Old Man</div>
+                </div>
+            </div>
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="1.8/Anagrams_flip.png" alt="An Oil Painting of People around a Campfire"
+                        onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">An Oil Painting of People around a Campfire</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 1.9 Hybrid Images -->
+        <div class="section-header" style="margin: 30px 0 20px 0;">
+            <h3 style="color: white; margin-bottom: 15px; font-size: 1.4rem;">1.9 Hybrid Images</h3>
+            <p class="section-description">Creating hybrid images using factorized diffusion by combining low and high
+                frequencies from different prompts.</p>
+        </div>
+
+        <div class="gallery">
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="1.9/campfire_man.png" alt="Campfire and Man Hybrid" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Campfire and Man Hybrid</div>
+                </div>
+            </div>
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="1.9/rocket_coast.png" alt="Rocket and Coast Hybrid" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Rocket and Coast Hybrid</div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>CS180 Project 5: Diffusion Models</p>
+            <p>DeepFloyd IF Diffusion Model Implementation</p>
+        </footer>
+    </div>
+
+    <!-- Modal for image viewing -->
+    <div id="imageModal" class="modal" onclick="closeModal()">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <img class="modal-content" id="modalImage">
+    </div>
+
+    <script>
+        function openModal(src) {
+            const modal = document.getElementById('imageModal');
+            const modalImg = document.getElementById('modalImage');
+            modal.style.display = 'block';
+            modalImg.src = src;
+        }
+
+        function closeModal() {
+            document.getElementById('imageModal').style.display = 'none';
+        }
+
+        // Close modal on ESC key
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape') {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+
+</html>
