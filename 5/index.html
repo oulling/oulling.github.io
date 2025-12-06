@@ -347,6 +347,39 @@
             font-size: 0.9rem;
         }
 
+        .analysis-box {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 30px 0;
+            color: white;
+        }
+
+        .analysis-box h3 {
+            color: white;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+        }
+
+        .analysis-box h4 {
+            color: white;
+            margin: 20px 0 15px 0;
+            font-size: 1.1rem;
+        }
+
+        .analysis-box p,
+        .analysis-box ul,
+        .analysis-box li {
+            line-height: 1.8;
+            font-size: 1rem;
+            margin-bottom: 10px;
+        }
+
+        .analysis-box ul {
+            margin-left: 20px;
+        }
+
         @media (max-width: 768px) {
             .side-by-side {
                 grid-template-columns: 1fr;
@@ -1464,6 +1497,333 @@
                 </div>
                 <div class="image-info">
                     <div class="image-title">Rocket and Coast Hybrid</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Part B: Flow Matching -->
+        <div class="section-header" style="margin: 40px 0 30px 0;">
+            <h2>Part B: Flow Matching</h2>
+        </div>
+
+        <!-- B.1: Single-Step Denoiser -->
+        <div class="section-header" style="margin: 30px 0 20px 0;">
+            <h3 style="color: white; margin-bottom: 15px; font-size: 1.4rem;">B.1: Single-Step Denoiser</h3>
+            <p class="section-description">
+                Exploring the limitations of single-step denoising approaches and understanding why they fail at
+                generation tasks.
+            </p>
+        </div>
+
+        <!-- 1.2.0 Noise Visualization -->
+        <div class="section-header" style="margin: 30px 0 20px 0;">
+            <h3 style="color: white; margin-bottom: 15px; font-size: 1.4rem;">1.2.0 Noise Visualization</h3>
+            <p class="section-description">Visualizing the noise distribution used for training.</p>
+        </div>
+
+        <div class="gallery">
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="B/B.1/1.2.0/noise_visualize.png" alt="Noise Visualization" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Noise Visualization</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 1.2.1 Training Process -->
+        <div class="section-header" style="margin: 30px 0 20px 0;">
+            <h3 style="color: white; margin-bottom: 15px; font-size: 1.4rem;">1.2.1 Training Process</h3>
+            <p class="section-description">Training progression and loss curve.</p>
+        </div>
+
+        <div class="side-by-side">
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="B/B.1/1.2.1/epoch_1.png" alt="Epoch 1" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Epoch 1</div>
+                </div>
+            </div>
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="B/B.1/1.2.1/epoch_5.png" alt="Epoch 5" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Epoch 5</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="gallery" style="margin-top: 30px;">
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="B/B.1/1.2.1/losscurve.png" alt="Loss Curve" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Training Loss Curve</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 1.2.2 Out-of-Distribution Testing -->
+        <div class="section-header" style="margin: 30px 0 20px 0;">
+            <h3 style="color: white; margin-bottom: 15px; font-size: 1.4rem;">1.2.2 Out-of-Distribution Testing</h3>
+            <p class="section-description">Testing the model on different noise levels.</p>
+        </div>
+
+        <div class="gallery">
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="B/B.1/1.2.2/OOD.png" alt="Out-of-Distribution Results" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Out-of-Distribution Results</div>
+                    <div class="image-description">
+                        Quantitative Analysis:<br>
+                        Sigma 0.0: Avg MSE 0.002462<br>
+                        Sigma 0.2: Avg MSE 0.003072<br>
+                        Sigma 0.4: Avg MSE 0.004465<br>
+                        Sigma 0.5: Avg MSE 0.006450 *<br>
+                        Sigma 0.6: Avg MSE 0.010589<br>
+                        Sigma 0.8: Avg MSE 0.019294<br>
+                        Sigma 1.0: Avg MSE 0.036643
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 1.2.3 Training Analysis -->
+        <div class="section-header" style="margin: 30px 0 20px 0;">
+            <h3 style="color: white; margin-bottom: 15px; font-size: 1.4rem;">1.2.3 Training Analysis</h3>
+            <p class="section-description">Detailed analysis of the training behavior and model limitations.</p>
+        </div>
+
+        <div class="side-by-side">
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="B/B.1/1.2.3/epoch_1.png" alt="Epoch 1" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Epoch 1</div>
+                </div>
+            </div>
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="B/B.1/1.2.3/epoch_5.png" alt="Epoch 5" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Epoch 5</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="gallery" style="margin-top: 30px;">
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="B/B.1/1.2.3/training_curve.png" alt="Training Curve" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Training Curve</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="analysis-box">
+            <h3>Observations</h3>
+            <p>
+                <strong>Pattern:</strong> Regardless of the input noise or number of training epochs, all generated
+                outputs are highly similar. The denoised images appear as a blurry superposition of all digits (0-9),
+                with overlapping contours from different digit classes visible.
+            </p>
+
+            <h4>Explanation</h4>
+            <p>
+                Since the input is pure random noise (containing no information about which digit to generate), but each
+                batch contains different target images (digits 0-9), the model learns to output a single image that
+                minimizes the average MSE across all training samples.
+            </p>
+
+            <p>
+                <strong>Key insight:</strong> With MSE loss, the optimal prediction is the <strong>centroid (mean) of
+                    the training dataset</strong> — a blurry "average digit" that represents the center of the data
+                distribution.
+            </p>
+
+            <h4>Why this happens:</h4>
+            <ul>
+                <li>The model cannot distinguish which digit to generate from random noise</li>
+                <li>To minimize loss across all training images, it outputs their average</li>
+                <li>This is mathematically equivalent to a clustering centroid</li>
+            </ul>
+
+            <h4>Conclusion</h4>
+            <p>
+                A single-step denoiser cannot perform generation tasks. It learns the dataset mean rather than the
+                underlying distribution, failing to produce diverse, recognizable digits. This motivates the need for
+                more sophisticated approaches like Flow Matching with time conditioning.
+            </p>
+        </div>
+
+        <!-- B.2 -->
+        <div class="section-header" style="margin: 40px 0 20px 0;">
+            <h3 style="color: white; margin-bottom: 15px; font-size: 1.4rem;">B.2: Adding Time Conditioning to UNet</h3>
+            <p class="section-description">Implementing Flow Matching with time conditioning to enable the model to
+                learn time-dependent denoising behavior.</p>
+        </div>
+
+        <div class="side-by-side">
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="B/B.2/epoch_1.png" alt="Epoch 1" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Epoch 1</div>
+                </div>
+            </div>
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="B/B.2/epoch_5.png" alt="Epoch 5" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Epoch 5</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="gallery" style="margin-top: 30px;">
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="B/B.2/epoch_10.png" alt="Epoch 10" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Epoch 10</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="side-by-side" style="margin-top: 30px;">
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="B/B.2/batch_trainingloss.png" alt="Batch Training Loss" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Batch Training Loss</div>
+                </div>
+            </div>
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="B/B.2/epoch_traininigloss.png" alt="Epoch Training Loss" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Epoch Training Loss</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- B.5 -->
+        <div class="section-header" style="margin: 40px 0 20px 0;">
+            <h3 style="color: white; margin-bottom: 15px; font-size: 1.4rem;">B.5: Adding Class-Conditioning to UNet
+            </h3>
+            <p class="section-description">Now we will sample with class-conditioning and will use classifier-free
+                guidance with gamma = 5.</p>
+        </div>
+
+        <div class="side-by-side">
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="B/B.5/epoch_1.png" alt="Epoch 1" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Epoch 1</div>
+                </div>
+            </div>
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="B/B.5/epoch_5.png" alt="Epoch 5" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Epoch 5</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="gallery" style="margin-top: 30px;">
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="B/B.5/epoch_10.png" alt="Epoch 10" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Epoch 10</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="side-by-side" style="margin-top: 30px;">
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="B/B.5/batch_loss.png" alt="Batch Loss" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Batch Loss</div>
+                </div>
+            </div>
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="B/B.5/epoch_loss.png" alt="Epoch Loss" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Epoch Loss</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- B.6 -->
+        <div class="section-header" style="margin: 40px 0 20px 0;">
+            <h3 style="color: white; margin-bottom: 15px; font-size: 1.4rem;">B.6: Removing the Learning Rate Scheduler
+            </h3>
+            <p class="section-description">Can we get rid of the annoying learning rate scheduler? Simplicity is the
+                best. Please try to maintain the same performance after removing the exponential learning rate
+                scheduler. Show your visualization after training without the scheduler and provide a description of
+                what you did to compensate for the loss of the scheduler.</p>
+        </div>
+
+        <div class="analysis-box" style="margin-top: 20px;">
+            <h4>Compensation Strategy</h4>
+            <p>
+                To compensate for the loss of the exponential learning rate scheduler, we changed the fixed learning
+                rate to 5e-3. All other hyperparameters remained unchanged.
+            </p>
+        </div>
+
+        <div class="side-by-side">
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="B/B.6/epoch_1.png" alt="Epoch 1" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Epoch 1</div>
+                </div>
+            </div>
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="B/B.6/epoch_5.png" alt="Epoch 5" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Epoch 5</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="gallery" style="margin-top: 30px;">
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="B/B.6/epoch_10.png" alt="Epoch 10" onclick="openModal(this.src)">
+                </div>
+                <div class="image-info">
+                    <div class="image-title">Epoch 10</div>
                 </div>
             </div>
         </div>
